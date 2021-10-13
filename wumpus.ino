@@ -16,6 +16,21 @@ const uint8_t westWall[2]  = {0x30, 0x00};
 
 uint16_t buttonStates[4] = {};
 
+const uint8_t mapWidth = 12;
+const uint8_t mapHeight = 12;
+
+uint8_t cave[mapWidth][mapHeight];
+
+const uint8_t wall        = 1 << 0;
+const uint8_t pit         = 1 << 1;
+const uint8_t bats        = 1 << 2;
+const uint8_t wumpus      = 1 << 3;
+const uint8_t pitWind     = 1 << 4;
+const uint8_t batsNearby  = 1 << 5;
+const uint8_t wumpusSmell = 1 << 6;
+
+uint8_t playerX, playerY;
+
 SevSegShift sevsegshift(
                   SHIFT_PIN_DS,
                   SHIFT_PIN_SHCP,
@@ -28,6 +43,33 @@ SevSegShift sevsegshift(
                           default value = false (see SevSegShift example)
                         */
                 );
+
+bool buttonState(button id) {
+  // debounce state
+  buttonStates[id] = (buttonStates[id] << 1) | digitalRead(buttonPins[id]) | 0xe000;
+  return (buttonStates[id] == 0xf000);
+}
+
+void updateCaveDisplay() {
+  uint8_t display[2] = {0, 0};
+  if (cave[playerX - 1][playerY] & wall) {
+    display[0] |= northWall[0];
+    display[1] |= northWall[1];
+  }
+  if (cave[playerX + 1][playerY] & wall) {
+    display[0] |= southWall[0];
+    display[1] |= southWall[1];
+  }
+  if (cave[playerX][playerY + 1] & wall) {
+    display[0] |= eastWall[0];
+    display[1] |= eastWall[1];
+  }
+  if (cave[playerX][playerY - 1] & wall) {
+    display[0] |= westWall[0];
+    display[1] |= westWall[1];
+  }
+  sevsegshift.setSegments(display);
+}
 
 void setup() {
   byte numDigits = 2;
@@ -43,7 +85,24 @@ void setup() {
   updateWithDelays, leadingZeros, disableDecPoint);
   sevsegshift.setBrightness(90);
 
-  for (uint8_t i = 0; i < 4; i++) {
+  uint8_t i, j;
+
+  for (i = 0; i < mapWidth; i++) {
+    for (j = 0; j < mapHeight; j++) {
+      cave[i][j] = 0;
+    }
+    cave[i][0] = wall;
+    cave[i][mapHeight - 1] = wall;
+  }
+  for (j = 0; j < mapHeight; j++) {
+    cave[0][j] = wall;
+    cave[mapHeight - 1][j] = wall;
+  }
+
+  playerX = 1;
+  playerY = 1;
+
+  for (i = 0; i < 4; i++) {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
 
@@ -99,58 +158,44 @@ void setup() {
   /* tone(7, 247); */
   /* delay(700); */
   /* noTone(); */
-}
 
-bool buttonState(button id) {
-  // debounce state
-  buttonStates[id] = (buttonStates[id] << 1) | digitalRead(buttonPins[id]) | 0xe000;
-  return (buttonStates[id] == 0xf000);
+  updateCaveDisplay();
+
+  tone(7, 247);
+  delay(300);
+  noTone();
 }
 
 void loop() {
-  static unsigned long timer = millis();
-  static int deciSeconds = 0;
-  static int wall = 0;
+  /* static unsigned long timer = millis(); */
+
+  uint8_t nextPlayerX = playerX;
+  uint8_t nextPlayerY = playerY;
 
   if (buttonState(north)) {
-    sevsegshift.setChars("N");
+    nextPlayerY--;
   }
   if (buttonState(south)) {
-    sevsegshift.setChars("S");
+    nextPlayerY++;
   }
   if (buttonState(east)) {
-    sevsegshift.setChars("E");
+    nextPlayerX++;
   }
   if (buttonState(west)) {
-    sevsegshift.setChars("uu");
+    nextPlayerX--;
   }
 
-  if (millis() - timer >= 100) {
-    timer += 100;
-    deciSeconds++; // 100 milliSeconds is equal to 1 deciSecond
-
-    if (deciSeconds % 10 == 0) {
-      wall++;
-      switch(wall) {
-        case 1:
-          sevsegshift.setSegments(northWall);
-          break;
-        case 2:
-          sevsegshift.setSegments(eastWall);
-          break;
-        case 3:
-          sevsegshift.setSegments(southWall);
-          break;
-        case 4:
-          sevsegshift.setSegments(westWall);
-          wall = 0;
-      }
+  if (nextPlayerX != playerX || nextPlayerY != playerY) {
+    if (cave[nextPlayerX][nextPlayerY] & wall) {
+      // wall beep
+      tone(7, 230);
+      delay(100);
+      noTone();
+    } else {
+      playerX = nextPlayerX;
+      playerY = nextPlayerY;
+      updateCaveDisplay();
     }
-
-    if (deciSeconds == 100) { // Reset to 0 after counting for 1000 seconds.
-      deciSeconds=0;
-    }
-    /* sevsegshift.setNumber(deciSeconds, 1); */
   }
 
   sevsegshift.refreshDisplay(); // Must run repeatedly
