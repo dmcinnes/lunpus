@@ -52,19 +52,19 @@ bool buttonState(button id) {
 
 void updateCaveDisplay() {
   uint8_t display[2] = {0, 0};
-  if (cave[playerX - 1][playerY] & wall) {
+  if (cave[playerX][playerY - 1] & wall) {
     display[0] |= northWall[0];
     display[1] |= northWall[1];
   }
-  if (cave[playerX + 1][playerY] & wall) {
+  if (cave[playerX][playerY + 1] & wall) {
     display[0] |= southWall[0];
     display[1] |= southWall[1];
   }
-  if (cave[playerX][playerY + 1] & wall) {
+  if (cave[playerX + 1][playerY] & wall) {
     display[0] |= eastWall[0];
     display[1] |= eastWall[1];
   }
-  if (cave[playerX][playerY - 1] & wall) {
+  if (cave[playerX - 1][playerY] & wall) {
     display[0] |= westWall[0];
     display[1] |= westWall[1];
   }
