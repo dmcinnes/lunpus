@@ -19,6 +19,13 @@ uint16_t buttonStates[4] = {};
 const uint8_t mapWidth = 12;
 const uint8_t mapHeight = 12;
 
+const uint8_t minWalls = 6;
+const uint8_t maxWalls = 20;
+const uint8_t minPits = 2;
+const uint8_t maxPits = 6;
+const uint8_t minBats = 2;
+const uint8_t maxBats = 6;
+
 uint8_t cave[mapWidth][mapHeight];
 
 const uint8_t wall        = 1 << 0;
@@ -68,24 +75,24 @@ void updateCaveDisplay() {
     display[0] |= westWall[0];
     display[1] |= westWall[1];
   }
+
   sevsegshift.setSegments(display);
 }
 
-void setup() {
-  byte numDigits = 2;
-  byte digitPins[] = {1, 2}; // These are the PINS of the ** Arduino **
-  byte segmentPins[] = {6, 7, 3, 2, 1, 5, 0, 4}; // these are the PINs of the ** Shift register **
-  bool resistorsOnSegments = false; // 'false' means resistors are on digit pins
-  byte hardwareConfig = COMMON_CATHODE; // See README.md for options
-  bool updateWithDelays = false; // Default 'false' is Recommended
-  bool leadingZeros = false; // Use 'true' if you'd like to keep the leading zeros
-  bool disableDecPoint = false; // Use 'true' if your decimal point doesn't exist or isn't connected
+void displayThings() {
+  /* if (cave[playerX][playerY] & pit) { */
+  /*   sevsegshift.setChars("P"); */
+  /* } */
+  /* if (cave[playerX][playerY] & bats) { */
+  /*   sevsegshift.setChars("b"); */
+  /* } */
+  /* if (cave[playerX][playerY] & wumpus) { */
+  /*   sevsegshift.setChars("uu"); */
+  /* } */
+}
 
-  sevsegshift.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments,
-  updateWithDelays, leadingZeros, disableDecPoint);
-  sevsegshift.setBrightness(90);
-
-  uint8_t i, j;
+void setupMap() {
+  uint8_t i, j, x, y, count;
 
   for (i = 0; i < mapWidth; i++) {
     for (j = 0; j < mapHeight; j++) {
@@ -99,10 +106,65 @@ void setup() {
     cave[mapHeight - 1][j] = wall;
   }
 
-  playerX = 1;
-  playerY = 1;
+  count = minWalls + random(maxWalls - minWalls);
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < count; i++) {
+    do {
+      x = random(mapWidth);
+      y = random(mapHeight);
+    } while (cave[x][y] != wall);
+    cave[x][y] = wall;
+  }
+
+  count = minPits + random(maxPits - minPits);
+
+  for (i = 0; i < count; i++) {
+    do {
+      x = random(mapWidth);
+      y = random(mapHeight);
+    } while (cave[x][y] != wall);
+    cave[x][y] = pit;
+  }
+
+  count = minBats + random(maxBats - minBats);
+
+  for (i = 0; i < count; i++) {
+    do {
+      x = random(mapWidth);
+      y = random(mapHeight);
+    } while (cave[x][y] != wall);
+    cave[x][y] = bats;
+  }
+
+  do {
+    x = random(mapWidth);
+    y = random(mapHeight);
+  } while (cave[x][y] == wall);
+  cave[x][y] = wumpus;
+}
+
+void setupPlayer() {
+  playerX = 1 + random(mapWidth - 2);
+  playerY = 1 + random(mapHeight - 2);
+}
+
+void setup() {
+  randomSeed(analogRead(9));
+
+  byte numDigits = 2;
+  byte digitPins[] = {1, 2}; // These are the PINS of the ** Arduino **
+  byte segmentPins[] = {6, 7, 3, 2, 1, 5, 0, 4}; // these are the PINs of the ** Shift register **
+  bool resistorsOnSegments = false; // 'false' means resistors are on digit pins
+  byte hardwareConfig = COMMON_CATHODE; // See README.md for options
+  bool updateWithDelays = false; // Default 'false' is Recommended
+  bool leadingZeros = false; // Use 'true' if you'd like to keep the leading zeros
+  bool disableDecPoint = false; // Use 'true' if your decimal point doesn't exist or isn't connected
+
+  sevsegshift.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments,
+  updateWithDelays, leadingZeros, disableDecPoint);
+  sevsegshift.setBrightness(90);
+
+  for (uint8_t i = 0; i < 4; i++) {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
 
@@ -159,6 +221,9 @@ void setup() {
   /* delay(700); */
   /* noTone(); */
 
+  setupMap();
+  setupPlayer();
+
   updateCaveDisplay();
 
   tone(7, 247);
@@ -195,6 +260,7 @@ void loop() {
       playerX = nextPlayerX;
       playerY = nextPlayerY;
       updateCaveDisplay();
+      displayThings();
     }
   }
 
