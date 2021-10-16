@@ -98,12 +98,14 @@ void setupMap() {
     for (j = 0; j < mapHeight; j++) {
       cave[i][j] = 0;
     }
+  }
+  for (i = 0; i < mapWidth; i++) {
     cave[i][0] = wall;
     cave[i][mapHeight - 1] = wall;
   }
   for (j = 0; j < mapHeight; j++) {
     cave[0][j] = wall;
-    cave[mapHeight - 1][j] = wall;
+    cave[mapWidth - 1][j] = wall;
   }
 
   count = minWalls + random(maxWalls - minWalls);
@@ -144,8 +146,8 @@ void setupMap() {
 }
 
 void setupPlayer() {
-  playerX = 1 + random(mapWidth - 2);
-  playerY = 1 + random(mapHeight - 2);
+  playerX = 1; // + random(mapWidth - 2);
+  playerY = 1; // + random(mapHeight - 2);
 }
 
 void setup() {
@@ -169,57 +171,6 @@ void setup() {
   }
 
   pinMode(7, OUTPUT);
-
-  /*
-  for (int i = 0; i < 10; i++) {
-    tone(7, 31);
-    delay(100);
-    tone(7, 40);
-    delay(100);
-  }
-  for (int i = 0; i < 10; i++) {
-    tone(7, 50);
-    delay(50);
-    tone(7, 48);
-    delay(100);
-  }
-  for (int i = 0; i < 10; i++) {
-    tone(7, 31);
-    delay(100);
-    tone(7, 40);
-    delay(100);
-  }
-  */
-
-  /* tone(7, 174); */
-  /* delay(300); */
-  /* tone(7, 208); */
-  /* delay(300); */
-  /* tone(7, 220); */
-  /* delay(300); */
-  /* tone(7, 247); */
-  /* delay(300); */
-  /* tone(7, 277); */
-  /* delay(300); */
-  /* tone(7, 220); */
-  /* delay(300); */
-  /* tone(7, 277); */
-  /* delay(700); */
-  /*  */
-  /* tone(7, 261); */
-  /* delay(300); */
-  /* tone(7, 208); */
-  /* delay(300); */
-  /* tone(7, 261); */
-  /* delay(700); */
-  /*  */
-  /* tone(7, 247); */
-  /* delay(300); */
-  /* tone(7, 196); */
-  /* delay(300); */
-  /* tone(7, 247); */
-  /* delay(700); */
-  /* noTone(); */
 
   setupMap();
   setupPlayer();
