@@ -26,15 +26,26 @@ const uint8_t maxPits = 6;
 const uint8_t minBats = 2;
 const uint8_t maxBats = 6;
 
-uint8_t cave[mapWidth][mapHeight];
+/**
+ * Cave map
+ *
+ * One nybble per room
+ * pit, bats, wumpus, wumpusSnore for each bit
+ * pit, bats and wumpus can be in the same room, but wumpusSnore should not be
+ * in the same room as the wumpus -- those two bits together will be a wall.
+ * 0 == empty
+ * xx11 == wall
+ */
 
-const uint8_t wall        = 1 << 0;
-const uint8_t pit         = 1 << 1;
-const uint8_t bats        = 1 << 2;
-const uint8_t wumpus      = 1 << 3;
-const uint8_t pitWind     = 1 << 4;
-const uint8_t batsNearby  = 1 << 5;
-const uint8_t wumpusSmell = 1 << 6;
+struct room {
+  unsigned int pit : 1;
+  unsigned int bats : 1;
+  unsigned int wumpus : 1;
+  unsigned int snore : 1;
+  unsigned int wall : 1;
+};
+
+struct room cave[mapWidth][mapHeight];
 
 uint8_t playerX, playerY;
 
@@ -51,6 +62,10 @@ SevSegShift sevsegshift(
                         */
                 );
 
+bool isWall(room rm) {
+  return (rm.wumpus && rm.snore);
+}
+
 bool buttonState(button id) {
   // debounce state
   buttonStates[id] = (buttonStates[id] << 1) | digitalRead(buttonPins[id]) | 0xe000;
@@ -59,19 +74,19 @@ bool buttonState(button id) {
 
 void updateCaveDisplay() {
   uint8_t display[2] = {0, 0};
-  if (cave[playerX][playerY - 1] & wall) {
+  if (isWall(cave[playerX][playerY - 1])) {
     display[0] |= northWall[0];
     display[1] |= northWall[1];
   }
-  if (cave[playerX][playerY + 1] & wall) {
+  if (isWall(cave[playerX][playerY + 1])) {
     display[0] |= southWall[0];
     display[1] |= southWall[1];
   }
-  if (cave[playerX + 1][playerY] & wall) {
+  if (isWall(cave[playerX + 1][playerY])) {
     display[0] |= eastWall[0];
     display[1] |= eastWall[1];
   }
-  if (cave[playerX - 1][playerY] & wall) {
+  if (isWall(cave[playerX - 1][playerY])) {
     display[0] |= westWall[0];
     display[1] |= westWall[1];
   }
@@ -95,17 +110,16 @@ void setupMap() {
   uint8_t i, j, x, y, count;
 
   for (i = 0; i < mapWidth; i++) {
-    for (j = 0; j < mapHeight; j++) {
-      cave[i][j] = 0;
-    }
-  }
-  for (i = 0; i < mapWidth; i++) {
-    cave[i][0] = wall;
-    cave[i][mapHeight - 1] = wall;
+    cave[i][0].wumpus = 1;
+    cave[i][0].snore = 1;
+    cave[i][mapHeight - 1].wumpus = 1;
+    cave[i][mapHeight - 1].snore = 1;
   }
   for (j = 0; j < mapHeight; j++) {
-    cave[0][j] = wall;
-    cave[mapWidth - 1][j] = wall;
+    cave[0][j].wumpus = 1;
+    cave[0][j].snore = 1;
+    cave[mapWidth - 1][j].wumpus = 1;
+    cave[mapWidth - 1][j].snore = 1;
   }
 
   count = minWalls + random(maxWalls - minWalls);
@@ -114,8 +128,9 @@ void setupMap() {
     do {
       x = random(mapWidth);
       y = random(mapHeight);
-    } while (cave[x][y] != wall);
-    cave[x][y] = wall;
+    } while (isWall(cave[x][y]));
+    cave[x][y].wumpus = 1;
+    cave[x][y].snore = 1;
   }
 
   count = minPits + random(maxPits - minPits);
@@ -124,8 +139,8 @@ void setupMap() {
     do {
       x = random(mapWidth);
       y = random(mapHeight);
-    } while (cave[x][y] != wall);
-    cave[x][y] = pit;
+    } while (isWall(cave[x][y]));
+    cave[x][y].pit = 1;
   }
 
   count = minBats + random(maxBats - minBats);
@@ -134,15 +149,15 @@ void setupMap() {
     do {
       x = random(mapWidth);
       y = random(mapHeight);
-    } while (cave[x][y] != wall);
-    cave[x][y] = bats;
+    } while (isWall(cave[x][y]));
+    cave[x][y].bats = 1;
   }
 
   do {
     x = random(mapWidth);
     y = random(mapHeight);
-  } while (cave[x][y] == wall);
-  cave[x][y] = wumpus;
+  } while (isWall(cave[x][y]));
+  cave[x][y].wumpus = 1;
 }
 
 void setupPlayer() {
@@ -202,7 +217,7 @@ void loop() {
   }
 
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
-    if (cave[nextPlayerX][nextPlayerY] & wall) {
+    if (isWall(cave[nextPlayerX][nextPlayerY])) {
       // wall beep
       tone(7, 230);
       delay(100);
