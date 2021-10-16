@@ -62,10 +62,6 @@ SevSegShift sevsegshift(
                         */
                 );
 
-bool isWall(room rm) {
-  return (rm.wumpus && rm.snore);
-}
-
 bool buttonState(button id) {
   // debounce state
   buttonStates[id] = (buttonStates[id] << 1) | digitalRead(buttonPins[id]) | 0xe000;
@@ -74,19 +70,19 @@ bool buttonState(button id) {
 
 void updateCaveDisplay() {
   uint8_t display[2] = {0, 0};
-  if (isWall(cave[playerX][playerY - 1])) {
+  if (cave[playerX][playerY - 1].wall) {
     display[0] |= northWall[0];
     display[1] |= northWall[1];
   }
-  if (isWall(cave[playerX][playerY + 1])) {
+  if (cave[playerX][playerY + 1].wall) {
     display[0] |= southWall[0];
     display[1] |= southWall[1];
   }
-  if (isWall(cave[playerX + 1][playerY])) {
+  if (cave[playerX + 1][playerY].wall) {
     display[0] |= eastWall[0];
     display[1] |= eastWall[1];
   }
-  if (isWall(cave[playerX - 1][playerY])) {
+  if (cave[playerX - 1][playerY].wall) {
     display[0] |= westWall[0];
     display[1] |= westWall[1];
   }
@@ -128,7 +124,7 @@ void setupMap() {
     do {
       x = random(mapWidth);
       y = random(mapHeight);
-    } while (isWall(cave[x][y]));
+    } while (cave[x][y].wall);
     cave[x][y].wumpus = 1;
     cave[x][y].snore = 1;
   }
@@ -139,7 +135,7 @@ void setupMap() {
     do {
       x = random(mapWidth);
       y = random(mapHeight);
-    } while (isWall(cave[x][y]));
+    } while (cave[x][y].wall);
     cave[x][y].pit = 1;
   }
 
@@ -149,14 +145,14 @@ void setupMap() {
     do {
       x = random(mapWidth);
       y = random(mapHeight);
-    } while (isWall(cave[x][y]));
+    } while (cave[x][y].wall);
     cave[x][y].bats = 1;
   }
 
   do {
     x = random(mapWidth);
     y = random(mapHeight);
-  } while (isWall(cave[x][y]));
+  } while (cave[x][y].wall);
   cave[x][y].wumpus = 1;
 }
 
@@ -217,7 +213,7 @@ void loop() {
   }
 
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
-    if (isWall(cave[nextPlayerX][nextPlayerY])) {
+    if (cave[nextPlayerX][nextPlayerY].wall) {
       // wall beep
       tone(7, 230);
       delay(100);
