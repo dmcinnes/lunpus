@@ -26,6 +26,8 @@ const uint8_t maxPits = 6;
 const uint8_t minBats = 2;
 const uint8_t maxBats = 6;
 
+const uint16_t maxBrightness = 90;
+
 struct room {
   unsigned int wall : 1;
   unsigned int pit : 1;
@@ -158,6 +160,28 @@ void displayWumpusNearby(unsigned long timer) {
   if (!cave[playerX][playerY].wumpusNearby) {
     return;
   }
+
+  static unsigned long nextAction = 0;
+  if (nextAction < timer) {
+    static int16_t currentBrightness;
+    static bool direction = true;
+    if (direction) {
+      currentBrightness += 1;
+      nextAction = timer + 10;
+      if (currentBrightness >= maxBrightness) {
+        direction = false;
+        nextAction += 2000;
+      }
+    } else {
+      currentBrightness -= 1;
+      nextAction = timer + 10;
+      if (currentBrightness <= 0) {
+        direction = true;
+        nextAction += 2000;
+      }
+    }
+    sevsegshift.setBrightness(currentBrightness);
+  }
 }
 
 void setupMap() {
@@ -238,6 +262,10 @@ void setupPlayer() {
   playerY = 1; // + random(mapHeight - 2);
 }
 
+void setDefaultBrightness() {
+  sevsegshift.setBrightness(maxBrightness);
+}
+
 void setup() {
   randomSeed(analogRead(1));
 
@@ -252,7 +280,8 @@ void setup() {
 
   sevsegshift.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments,
   updateWithDelays, leadingZeros, disableDecPoint);
-  sevsegshift.setBrightness(90);
+
+  setDefaultBrightness();
 
   for (uint8_t i = 0; i < 4; i++) {
     pinMode(buttonPins[i], INPUT_PULLUP);
@@ -299,12 +328,14 @@ void loop() {
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;
+      setDefaultBrightness();
       updateCaveDisplay();
       displayThings();
     }
   }
 
   displayBatsNearby(timer);
+  displayWumpusNearby(timer);
 
   sevsegshift.refreshDisplay(); // Must run repeatedly
 }
