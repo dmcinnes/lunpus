@@ -26,23 +26,14 @@ const uint8_t maxPits = 6;
 const uint8_t minBats = 2;
 const uint8_t maxBats = 6;
 
-/**
- * Cave map
- *
- * One nybble per room
- * pit, bats, wumpus, wumpusSnore for each bit
- * pit, bats and wumpus can be in the same room, but wumpusSnore should not be
- * in the same room as the wumpus -- those two bits together will be a wall.
- * 0 == empty
- * xx11 == wall
- */
-
 struct room {
+  unsigned int wall : 1;
   unsigned int pit : 1;
   unsigned int bats : 1;
   unsigned int wumpus : 1;
-  unsigned int snore : 1;
-  unsigned int wall : 1;
+  unsigned int wumpusNearby : 1;
+  unsigned int pitNearby : 1;
+  unsigned int batsNearby : 1;
 };
 
 struct room cave[mapWidth][mapHeight];
@@ -69,6 +60,7 @@ bool buttonState(button id) {
 }
 
 void updateCaveDisplay() {
+  sevsegshift.blank();
   uint8_t display[2] = {0, 0};
   if (cave[playerX][playerY - 1].wall) {
     display[0] |= northWall[0];
@@ -102,6 +94,66 @@ void displayThings() {
   }
 }
 
+enum batStates{batStartNorth, batEndNorth, batStartSouth, batEndSouth, batReset};
+
+void displayBatsNearby(unsigned long timer) {
+  if (!cave[playerX][playerY].batsNearby) {
+    return;
+  }
+
+  static unsigned long nextAction = 0;
+  if (nextAction < timer) {
+    static bool batPos;
+    static batStates batState = batStartNorth;
+    uint8_t segments[2];
+    sevsegshift.getSegments(segments);
+
+    switch(batState) {
+      case batStartNorth :
+        segments[0] |= 0x80;
+        batState = batEndNorth;
+        nextAction = timer + 50 + random(100);
+        break;
+      case batStartSouth :
+        segments[1] |= 0x80;
+        batState = batEndSouth;
+        nextAction = timer + 50 + random(100);
+        break;
+      case batEndNorth :
+        segments[0] ^= 0x80;
+        segments[1] |= 0x80;
+        batState = batReset;
+        nextAction = timer + 100 + random(100);
+        break;
+      case batEndSouth :
+        segments[0] |= 0x80;
+        segments[1] ^= 0x80;
+        batState = batReset;
+        nextAction = timer + 100 + random(100);
+        break;
+      case batReset :
+        batState = (random(2)) ? batStartNorth : batStartSouth;
+        nextAction = timer + 500 + random(500);
+        // reset cave view
+        updateCaveDisplay();
+        return;
+    }
+    sevsegshift.setSegments(segments);
+  }
+}
+
+void displayPitNearby(unsigned long timer) {
+  if (!cave[playerX][playerY].pitNearby) {
+    return;
+  }
+}
+
+void displayWumpusNearby(unsigned long timer) {
+  if (!cave[playerX][playerY].wumpusNearby) {
+    return;
+  }
+}
+
 void setupMap() {
   uint8_t i, j, x, y, count;
 
@@ -132,6 +184,14 @@ void setupMap() {
       y = random(mapHeight);
     } while (cave[x][y].wall);
     cave[x][y].pit = 1;
+    cave[x - 1][y - 1].pitNearby = 1;
+    cave[x - 1][y    ].pitNearby = 1;
+    cave[x - 1][y + 1].pitNearby = 1;
+    cave[x    ][y - 1].pitNearby = 1;
+    cave[x    ][y + 1].pitNearby = 1;
+    cave[x + 1][y - 1].pitNearby = 1;
+    cave[x + 1][y    ].pitNearby = 1;
+    cave[x + 1][y + 1].pitNearby = 1;
   }
 
   count = minBats + random(maxBats - minBats);
@@ -142,6 +202,14 @@ void setupMap() {
       y = random(mapHeight);
     } while (cave[x][y].wall);
     cave[x][y].bats = 1;
+    cave[x - 1][y - 1].batsNearby = 1;
+    cave[x - 1][y    ].batsNearby = 1;
+    cave[x - 1][y + 1].batsNearby = 1;
+    cave[x    ][y - 1].batsNearby = 1;
+    cave[x    ][y + 1].batsNearby = 1;
+    cave[x + 1][y - 1].batsNearby = 1;
+    cave[x + 1][y    ].batsNearby = 1;
+    cave[x + 1][y + 1].batsNearby = 1;
   }
 
   do {
@@ -149,6 +217,14 @@ void setupMap() {
     y = random(mapHeight);
   } while (cave[x][y].wall);
   cave[x][y].wumpus = 1;
+  cave[x - 1][y - 1].wumpusNearby = 1;
+  cave[x - 1][y    ].wumpusNearby = 1;
+  cave[x - 1][y + 1].wumpusNearby = 1;
+  cave[x    ][y - 1].wumpusNearby = 1;
+  cave[x    ][y + 1].wumpusNearby = 1;
+  cave[x + 1][y - 1].wumpusNearby = 1;
+  cave[x + 1][y    ].wumpusNearby = 1;
+  cave[x + 1][y + 1].wumpusNearby = 1;
 }
 
 void setupPlayer() {
@@ -189,7 +265,8 @@ void setup() {
 }
 
 void loop() {
-  /* static unsigned long timer = millis(); */
+  static unsigned long timer;
+  timer = millis();
 
   uint8_t nextPlayerX = playerX;
   uint8_t nextPlayerY = playerY;
@@ -210,9 +287,9 @@ void loop() {
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
     if (cave[nextPlayerX][nextPlayerY].wall) {
       // wall beep
-      tone(7, 230);
-      delay(100);
-      noTone();
+      /* tone(7, 230); */
+      /* delay(100); */
+      /* noTone(); */
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;
@@ -220,6 +297,8 @@ void loop() {
       displayThings();
     }
   }
+
+  displayBatsNearby(timer);
 
   sevsegshift.refreshDisplay(); // Must run repeatedly
 }
