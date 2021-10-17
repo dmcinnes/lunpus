@@ -91,31 +91,27 @@ void updateCaveDisplay() {
 }
 
 void displayThings() {
-  /* if (cave[playerX][playerY] & pit) { */
-  /*   sevsegshift.setChars("P"); */
-  /* } */
-  /* if (cave[playerX][playerY] & bats) { */
-  /*   sevsegshift.setChars("b"); */
-  /* } */
-  /* if (cave[playerX][playerY] & wumpus) { */
-  /*   sevsegshift.setChars("uu"); */
-  /* } */
+  if (cave[playerX][playerY].pit) {
+    sevsegshift.setChars("P");
+  }
+  if (cave[playerX][playerY].bats) {
+    sevsegshift.setChars("b");
+  }
+  if (cave[playerX][playerY].wumpus) {
+    sevsegshift.setChars("uu");
+  }
 }
 
 void setupMap() {
   uint8_t i, j, x, y, count;
 
   for (i = 0; i < mapWidth; i++) {
-    cave[i][0].wumpus = 1;
-    cave[i][0].snore = 1;
-    cave[i][mapHeight - 1].wumpus = 1;
-    cave[i][mapHeight - 1].snore = 1;
+    cave[i][0].wall = 1;
+    cave[i][mapHeight - 1].wall = 1;
   }
   for (j = 0; j < mapHeight; j++) {
-    cave[0][j].wumpus = 1;
-    cave[0][j].snore = 1;
-    cave[mapWidth - 1][j].wumpus = 1;
-    cave[mapWidth - 1][j].snore = 1;
+    cave[0][j].wall = 1;
+    cave[mapWidth - 1][j].wall = 1;
   }
 
   count = minWalls + random(maxWalls - minWalls);
@@ -125,8 +121,7 @@ void setupMap() {
       x = random(mapWidth);
       y = random(mapHeight);
     } while (cave[x][y].wall);
-    cave[x][y].wumpus = 1;
-    cave[x][y].snore = 1;
+    cave[x][y].wall = 1;
   }
 
   count = minPits + random(maxPits - minPits);
@@ -162,7 +157,7 @@ void setupPlayer() {
 }
 
 void setup() {
-  randomSeed(analogRead(9));
+  randomSeed(analogRead(1));
 
   byte numDigits = 2;
   byte digitPins[] = {1, 2}; // These are the PINS of the ** Arduino **
@@ -188,9 +183,9 @@ void setup() {
 
   updateCaveDisplay();
 
-  tone(7, 247);
-  delay(300);
-  noTone();
+  /* tone(7, 247); */
+  /* delay(300); */
+  /* noTone(); */
 }
 
 void loop() {
