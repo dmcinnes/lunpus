@@ -94,7 +94,7 @@ void displayThings() {
   }
 }
 
-enum batStates{batStartNorth, batEndNorth, batStartSouth, batEndSouth, batReset};
+enum batStates{batStartNorth, batEndNorth, batStartSouth, batEndSouth, batClear, batReset};
 
 void displayBatsNearby(unsigned long timer) {
   if (!cave[playerX][playerY].batsNearby) {
@@ -111,10 +111,12 @@ void displayBatsNearby(unsigned long timer) {
     switch(batState) {
       case batStartNorth :
         segments[0] |= 0x80;
+        segments[1] ^= 0x80;
         batState = batEndNorth;
         nextAction = timer + 50 + random(100);
         break;
       case batStartSouth :
+        segments[0] ^= 0x80;
         segments[1] |= 0x80;
         batState = batEndSouth;
         nextAction = timer + 50 + random(100);
@@ -122,14 +124,20 @@ void displayBatsNearby(unsigned long timer) {
       case batEndNorth :
         segments[0] ^= 0x80;
         segments[1] |= 0x80;
-        batState = batReset;
+        batState = batClear;
         nextAction = timer + 100 + random(100);
         break;
       case batEndSouth :
         segments[0] |= 0x80;
         segments[1] ^= 0x80;
-        batState = batReset;
+        batState = batClear;
         nextAction = timer + 100 + random(100);
+        break;
+      case batClear :
+        segments[0] ^= 0x80;
+        segments[1] ^= 0x80;
+        nextAction = timer + 100;
+        batState = batReset;
         break;
       case batReset :
         batState = (random(2)) ? batStartNorth : batStartSouth;
