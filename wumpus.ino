@@ -111,12 +111,10 @@ void displayBatsNearby(unsigned long timer) {
     switch(batState) {
       case batStartNorth :
         segments[0] |= 0x80;
-        segments[1] ^= 0x80;
         batState = batEndNorth;
         nextAction = timer + 50 + random(100);
         break;
       case batStartSouth :
-        segments[0] ^= 0x80;
         segments[1] |= 0x80;
         batState = batEndSouth;
         nextAction = timer + 50 + random(100);
@@ -134,8 +132,8 @@ void displayBatsNearby(unsigned long timer) {
         nextAction = timer + 100 + random(100);
         break;
       case batClear :
-        segments[0] ^= 0x80;
-        segments[1] ^= 0x80;
+        segments[0] &= 0x7F;
+        segments[1] &= 0x7F;
         nextAction = timer + 100;
         batState = batReset;
         break;
