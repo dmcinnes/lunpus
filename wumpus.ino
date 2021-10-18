@@ -28,6 +28,10 @@ const uint8_t maxBats = 6;
 
 const uint16_t maxBrightness = 90;
 
+const uint8_t totalWindSegments = 7;
+const uint8_t windEast[totalWindSegments * 2] =
+  {0x4F, 0xFF, 0x36, 0xFF, 0xF9, 0xFF, 0x7F, 0x7F, 0xFF, 0x4F, 0xFF, 0x36, 0xFF, 0xF9};
+
 struct room {
   unsigned int wall : 1;
   unsigned int pit : 1;
@@ -142,8 +146,7 @@ void displayBatsNearby(unsigned long timer) {
       case batReset :
         batState = (random(2)) ? batStartNorth : batStartSouth;
         nextAction = timer + 500 + random(500);
-        // reset cave view
-        updateCaveDisplay();
+        updateCaveDisplay(); // reset cave view
         return;
     }
     sevsegshift.setSegments(segments);
@@ -153,6 +156,23 @@ void displayBatsNearby(unsigned long timer) {
 void displayPitNearby(unsigned long timer) {
   if (!cave[playerX][playerY].pitNearby) {
     return;
+  }
+  static unsigned long nextAction = 0;
+  if (nextAction < timer) {
+    static uint8_t windOffset = 0;
+    updateCaveDisplay();
+    if (windOffset == totalWindSegments) {
+      windOffset = 0;
+      nextAction = timer + 800;
+      return;
+    }
+    uint8_t segments[2];
+    sevsegshift.getSegments(segments);
+    segments[0] &= windEast[windOffset * 2];
+    segments[1] &= windEast[windOffset * 2 + 1];
+    sevsegshift.setSegments(segments);
+    windOffset++;
+    nextAction = timer + 75;
   }
 }
 
@@ -335,6 +355,7 @@ void loop() {
   }
 
   displayBatsNearby(timer);
+  displayPitNearby(timer);
   displayWumpusNearby(timer);
 
   sevsegshift.refreshDisplay(); // Must run repeatedly
