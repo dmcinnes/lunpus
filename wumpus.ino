@@ -28,8 +28,11 @@ const uint8_t maxBats = 6;
 
 const uint16_t maxBrightness = 90;
 
-const uint8_t totalWindSegments = 7;
-const uint8_t windEast[totalWindSegments * 2] =
+const uint8_t totalWindSegmentsNorthSouth = 5;
+const uint8_t windNorthSouth[totalWindSegmentsNorthSouth * 2] =
+  {0xFE, 0x7E, 0xDD, 0xDD, 0xBB, 0xBB, 0xEB, 0xEB, 0x77, 0xF7};
+const uint8_t totalWindSegmentsWestEast = 7;
+const uint8_t windWestEast[totalWindSegmentsWestEast * 2] =
   {0x4F, 0xFF, 0x36, 0xFF, 0xF9, 0xFF, 0x7F, 0x7F, 0xFF, 0x4F, 0xFF, 0x36, 0xFF, 0xF9};
 
 struct room {
@@ -154,24 +157,50 @@ void displayBatsNearby(unsigned long timer) {
 }
 
 void displayPitNearby(unsigned long timer) {
-  if (!cave[playerX][playerY].pitNearby) {
-    return;
-  }
+  /* if (!cave[playerX][playerY].pitNearby) { */
+  /*   return; */
+  /* } */
   static unsigned long nextAction = 0;
   if (nextAction < timer) {
     static uint8_t windOffset = 0;
-    updateCaveDisplay();
-    if (windOffset == totalWindSegments) {
+    uint8_t selection = (playerX * playerY) % 4;
+    uint8_t segmentCount = (selection % 2) ? totalWindSegmentsNorthSouth : totalWindSegmentsWestEast;
+    bool segmentDirection = (selection < 2); // true up, false down
+    if (windOffset > segmentCount) { // make sure we're not out of range when moving positions
       windOffset = 0;
-      nextAction = timer + 800;
+    }
+    updateCaveDisplay();
+    if ((segmentDirection && windOffset == segmentCount) || (!segmentDirection && windOffset == 0)) {
+      windOffset = (segmentDirection) ? 0 : segmentCount - 1;
+      nextAction = timer + 400 + random(600);
       return;
     }
+
     uint8_t segments[2];
     sevsegshift.getSegments(segments);
-    segments[0] &= windEast[windOffset * 2];
-    segments[1] &= windEast[windOffset * 2 + 1];
+    switch (selection) {
+      case 0:
+        segments[0] &= windNorthSouth[windOffset * 2];
+        segments[1] &= windNorthSouth[windOffset * 2 + 1];
+        windOffset++;
+        break;
+      case 1:
+        segments[0] &= windWestEast[windOffset * 2];
+        segments[1] &= windWestEast[windOffset * 2 + 1];
+        windOffset++;
+        break;
+      case 2:
+        segments[0] &= windNorthSouth[windOffset * 2];
+        segments[1] &= windNorthSouth[windOffset * 2 + 1];
+        windOffset--;
+        break;
+      case 3:
+        segments[0] &= windWestEast[windOffset * 2];
+        segments[1] &= windWestEast[windOffset * 2 + 1];
+        windOffset--;
+        break;
+    }
     sevsegshift.setSegments(segments);
-    windOffset++;
     nextAction = timer + 75;
   }
 }
