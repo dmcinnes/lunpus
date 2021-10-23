@@ -26,7 +26,7 @@ const uint8_t maxPits = 6;
 const uint8_t minBats = 2;
 const uint8_t maxBats = 6;
 
-const uint16_t maxBrightness = 90;
+const uint8_t maxBrightness = 90;
 
 const uint8_t totalWindSegmentsNorthSouth = 5;
 const uint8_t windNorthSouth[totalWindSegmentsNorthSouth * 2] =
@@ -157,52 +157,68 @@ void displayBatsNearby(unsigned long timer) {
 }
 
 void displayPitNearby(unsigned long timer) {
-  /* if (!cave[playerX][playerY].pitNearby) { */
-  /*   return; */
-  /* } */
-  static unsigned long nextAction = 0;
-  if (nextAction < timer) {
-    static uint8_t windOffset = 0;
-    uint8_t selection = (playerX * playerY) % 4;
-    uint8_t segmentCount = (selection % 2) ? totalWindSegmentsNorthSouth : totalWindSegmentsWestEast;
-    bool segmentDirection = (selection < 2); // true up, false down
-    if (windOffset > segmentCount) { // make sure we're not out of range when moving positions
-      windOffset = 0;
-    }
-    updateCaveDisplay();
-    if ((segmentDirection && windOffset == segmentCount) || (!segmentDirection && windOffset == 0)) {
-      windOffset = (segmentDirection) ? 0 : segmentCount - 1;
-      nextAction = timer + 400 + random(600);
-      return;
-    }
-
-    uint8_t segments[2];
-    sevsegshift.getSegments(segments);
-    switch (selection) {
-      case 0:
-        segments[0] &= windNorthSouth[windOffset * 2];
-        segments[1] &= windNorthSouth[windOffset * 2 + 1];
-        windOffset++;
-        break;
-      case 1:
-        segments[0] &= windWestEast[windOffset * 2];
-        segments[1] &= windWestEast[windOffset * 2 + 1];
-        windOffset++;
-        break;
-      case 2:
-        segments[0] &= windNorthSouth[windOffset * 2];
-        segments[1] &= windNorthSouth[windOffset * 2 + 1];
-        windOffset--;
-        break;
-      case 3:
-        segments[0] &= windWestEast[windOffset * 2];
-        segments[1] &= windWestEast[windOffset * 2 + 1];
-        windOffset--;
-        break;
-    }
-    sevsegshift.setSegments(segments);
-    nextAction = timer + 75;
+  if (!cave[playerX][playerY].pitNearby) {
+    return;
   }
+  uint8_t *maskSegments;
+  uint8_t totalMaskSegments, selection;
+  if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) <
+      (cave[playerX + 1][playerY].wall + cave[playerX - 1][playerY].wall)) {
+    maskSegments = windNorthSouth;
+    totalMaskSegments = totalWindSegmentsNorthSouth;
+    selection = playerX % 2;
+  } else {
+    maskSegments = windWestEast;
+    totalMaskSegments = totalWindSegmentsWestEast;
+    selection = playerY % 2;
+  }
+  if (selection) {
+    displayPitNearbyUp(timer, maskSegments, totalMaskSegments);
+  } else {
+    displayPitNearbyDown(timer, maskSegments, totalMaskSegments);
+  }
+}
+
+void displayPitNearbyUp(unsigned long timer, uint8_t *maskSegments, uint8_t maskSegmentCount) {
+  static unsigned long nextAction = 0;
+  static uint8_t windOffset = 0;
+  if (nextAction > timer) {
+    return;
+  }
+  updateCaveDisplay();
+  if (windOffset == maskSegmentCount) {
+    windOffset = 0;
+    nextAction = timer + 400 + random(600);
+    return;
+  }
+  uint8_t displaySegments[2];
+  sevsegshift.getSegments(displaySegments);
+  displaySegments[0] &= maskSegments[windOffset * 2];
+  displaySegments[1] &= maskSegments[windOffset * 2 + 1];
+  sevsegshift.setSegments(displaySegments);
+  nextAction = timer + 75;
+  windOffset++;
+}
+
+void displayPitNearbyDown(unsigned long timer, uint8_t *maskSegments, uint8_t maskSegmentCount) {
+  static unsigned long nextAction = 0;
+  static uint8_t windOffset = 0;
+  if (nextAction > timer) {
+    return;
+  }
+  updateCaveDisplay();
+  if (windOffset == 0xFF) { // wrapped around
+    windOffset = maskSegmentCount - 1;
+    nextAction = timer + 400 + random(600);
+    return;
+  }
+  uint8_t displaySegments[2];
+  sevsegshift.getSegments(displaySegments);
+  displaySegments[0] &= maskSegments[windOffset * 2];
+  displaySegments[1] &= maskSegments[windOffset * 2 + 1];
+  sevsegshift.setSegments(displaySegments);
+  nextAction = timer + 75;
+  windOffset--;
 }
 
 void displayWumpusNearby(unsigned long timer) {
