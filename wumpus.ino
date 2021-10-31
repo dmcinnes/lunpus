@@ -1,4 +1,5 @@
 #include "SevSegShift.h"
+#include "scale16.h"
 
 #define SHIFT_PIN_SHCP 5
 #define SHIFT_PIN_STCP 4
@@ -7,7 +8,7 @@
 enum button{north, south, east, west};
 
 // north, south, east, west
-const uint8_t buttonPins[4] = {9, 8, 6, 10};
+const uint8_t buttonPins[4] = {9, 8, 7, 10};
 
 const uint8_t northWall[2] = {0x01, 0x81};
 const uint8_t southWall[2] = {0x88, 0x08};
@@ -331,8 +332,27 @@ void setDefaultBrightness() {
   sevsegshift.setBrightness(maxBrightness);
 }
 
+void initSpeaker() {
+  // reset the registers
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCCR1B |= (1 << WGM12);  // CTC: Clear Timer on Compare with OCR1A
+  TCCR1A |= (1 << COM1A0); // Toggle OC1A on Compare Match
+  TCCR1B |= (1 << CS11);   // CPU clock / 8
+}
+
+static inline void playNote(uint16_t period, uint16_t duration) {
+  TCNT1 = 0;                                      /* reset the counter */
+  OCR1A = period;                                     /* set pitch */
+  DDRA |= (1 << DDA6);
+  delay(duration);
+  DDRA &= ~(1 << DDA6);
+}
+
 void setup() {
   randomSeed(analogRead(1));
+
+  initSpeaker();
 
   byte numDigits = 2;
   byte digitPins[] = {1, 2}; // These are the PINS of the ** Arduino **
@@ -352,16 +372,40 @@ void setup() {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
 
-  pinMode(7, OUTPUT);
-
   setupMap();
   setupPlayer();
 
   updateCaveDisplay();
 
-  /* tone(7, 247); */
-  /* delay(300); */
-  /* noTone(); */
+  playNote(A2, 200);
+  playNote(B2, 200);
+  playNote(C3, 200);
+  playNote(D3, 200);
+  playNote(E3, 200);
+  playNote(C3, 200);
+  playNote(E3, 200);
+  delay(200);
+  playNote(Dx3, 200);
+  playNote(B2, 200);
+  playNote(Dx3, 200);
+  delay(200);
+  playNote(D3, 200);
+  playNote(Ax2, 200);
+  playNote(D3, 200);
+  delay(200);
+  playNote(A2, 200);
+  playNote(B2, 200);
+  playNote(C3, 200);
+  playNote(D3, 200);
+  playNote(E3, 200);
+  playNote(C3, 200);
+  playNote(E3, 200);
+  playNote(A3, 200);
+  playNote(G3, 200);
+  playNote(E3, 200);
+  playNote(C3, 200);
+  playNote(E3, 200);
+  playNote(G3, 500);
 }
 
 void loop() {
@@ -387,9 +431,7 @@ void loop() {
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
     if (cave[nextPlayerX][nextPlayerY].wall) {
       // wall beep
-      /* tone(7, 230); */
-      /* delay(100); */
-      /* noTone(); */
+      playNote(252, 200);
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;
