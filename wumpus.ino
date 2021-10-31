@@ -1,3 +1,4 @@
+#include <avr/pgmspace.h>
 #include "SevSegShift.h"
 #include "scale16.h"
 
@@ -35,6 +36,42 @@ const uint8_t windNorthSouth[totalWindSegmentsNorthSouth * 2] =
 const uint8_t totalWindSegmentsWestEast = 7;
 const uint8_t windWestEast[totalWindSegmentsWestEast * 2] =
   {0x4F, 0xFF, 0x36, 0xFF, 0xF9, 0xFF, 0x7F, 0x7F, 0xFF, 0x4F, 0xFF, 0x36, 0xFF, 0xF9};
+
+const uint16_t hallOfTheMountainKing[] PROGMEM = {
+  A2,   200,
+  B2,   200,
+  C3,   200,
+  D3,   200,
+  E3,   200,
+  C3,   200,
+  E3,   200,
+  REST, 200,
+  Dx3,  200,
+  B2,   200,
+  Dx3,  200,
+  REST, 200,
+  D3,   200,
+  Ax2,  200,
+  D3,   200,
+  REST, 200,
+  A2,   200,
+  B2,   200,
+  C3,   200,
+  D3,   200,
+  E3,   200,
+  C3,   200,
+  E3,   200,
+  A3,   200,
+  G3,   200,
+  E3,   200,
+  C3,   200,
+  E3,   200,
+  G3,   500
+};
+
+unsigned long nextNoteTime = 0;
+uint8_t currentNote = 0;
+uint8_t currentSong = 0;
 
 struct room {
   unsigned int wall : 1;
@@ -341,12 +378,44 @@ void initSpeaker() {
   TCCR1B |= (1 << CS11);   // CPU clock / 8
 }
 
-static inline void playNote(uint16_t period, uint16_t duration) {
-  TCNT1 = 0;                                      /* reset the counter */
-  OCR1A = period;                                     /* set pitch */
-  DDRA |= (1 << DDA6);
-  delay(duration);
-  DDRA &= ~(1 << DDA6);
+void playNote(uint16_t note) {
+  if (note == REST) {
+    DDRA &= ~(1 << DDA6); // disable output pin
+    return;
+  }
+  TCNT1 = 0;            // reset the counter
+  OCR1A = note;         // set pitch
+  DDRA |= (1 << DDA6);  // enable output pin
+}
+
+void updateAudio(unsigned long timer) {
+  if (currentSong == 0) {
+    return;
+  }
+  if (timer < nextNoteTime) {
+    return;
+  }
+  currentNote++;
+  if (currentNote >= 29) {
+    // stop
+    playNote(REST);
+    currentSong = 0;
+    currentNote = 0;
+    return;
+  }
+  nextNoteTime = pgm_read_word(&hallOfTheMountainKing[currentNote*2 + 1]) + timer;
+  playNote(pgm_read_word(&hallOfTheMountainKing[currentNote*2]));
+}
+
+void playSong(uint8_t newSong, unsigned long timer) {
+  currentNote = 0;
+  currentSong = newSong;
+  nextNoteTime = pgm_read_word(&hallOfTheMountainKing[1]) + timer;
+  playNote(pgm_read_word(&hallOfTheMountainKing[0]));
+}
+
+void stopSong() {
+  currentSong = 0;
 }
 
 void setup() {
@@ -377,35 +446,7 @@ void setup() {
 
   updateCaveDisplay();
 
-  playNote(A2, 200);
-  playNote(B2, 200);
-  playNote(C3, 200);
-  playNote(D3, 200);
-  playNote(E3, 200);
-  playNote(C3, 200);
-  playNote(E3, 200);
-  delay(200);
-  playNote(Dx3, 200);
-  playNote(B2, 200);
-  playNote(Dx3, 200);
-  delay(200);
-  playNote(D3, 200);
-  playNote(Ax2, 200);
-  playNote(D3, 200);
-  delay(200);
-  playNote(A2, 200);
-  playNote(B2, 200);
-  playNote(C3, 200);
-  playNote(D3, 200);
-  playNote(E3, 200);
-  playNote(C3, 200);
-  playNote(E3, 200);
-  playNote(A3, 200);
-  playNote(G3, 200);
-  playNote(E3, 200);
-  playNote(C3, 200);
-  playNote(E3, 200);
-  playNote(G3, 500);
+  playSong(1, millis());
 }
 
 void loop() {
@@ -431,7 +472,6 @@ void loop() {
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
     if (cave[nextPlayerX][nextPlayerY].wall) {
       // wall beep
-      playNote(252, 200);
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;
@@ -444,6 +484,8 @@ void loop() {
   displayBatsNearby(timer);
   displayPitNearby(timer);
   displayWumpusNearby(timer);
+
+  updateAudio(timer);
 
   sevsegshift.refreshDisplay(); // Must run repeatedly
 }

@@ -1,3 +1,5 @@
+#define REST 0
+
 #define A2 455
 #define Ax2 429
 #define B2 405
