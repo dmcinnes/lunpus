@@ -37,7 +37,7 @@ const uint8_t totalWindSegmentsWestEast = 7;
 const uint8_t windWestEast[totalWindSegmentsWestEast * 2] =
   {0x4F, 0xFF, 0x36, 0xFF, 0xF9, 0xFF, 0x7F, 0x7F, 0xFF, 0x4F, 0xFF, 0x36, 0xFF, 0xF9};
 
-const uint16_t hallOfTheMountainKing[] PROGMEM = {
+const uint16_t hotmk[] PROGMEM = {
   A2,   200,
   B2,   200,
   C3,   200,
@@ -403,15 +403,18 @@ void updateAudio(unsigned long timer) {
     currentNote = 0;
     return;
   }
-  nextNoteTime = pgm_read_word(&hallOfTheMountainKing[currentNote*2 + 1]) + timer;
-  playNote(pgm_read_word(&hallOfTheMountainKing[currentNote*2]));
+  playNextNote(hotmk, timer);
+}
+
+void playNextNote(uint16_t song[], unsigned long timer) {
+  nextNoteTime = pgm_read_word(&song[currentNote*2 + 1]) + timer;
+  playNote(pgm_read_word(&song[currentNote*2]));
 }
 
 void playSong(uint8_t newSong, unsigned long timer) {
   currentNote = 0;
   currentSong = newSong;
-  nextNoteTime = pgm_read_word(&hallOfTheMountainKing[1]) + timer;
-  playNote(pgm_read_word(&hallOfTheMountainKing[0]));
+  playNextNote(hotmk, timer);
 }
 
 void stopSong() {
