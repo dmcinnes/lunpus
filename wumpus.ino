@@ -1,6 +1,7 @@
 #include <avr/pgmspace.h>
 #include "SevSegShift.h"
 #include "scale16.h"
+#include "songs.h"
 
 #define SHIFT_PIN_SHCP 5
 #define SHIFT_PIN_STCP 4
@@ -30,48 +31,10 @@ const uint8_t maxBats = 6;
 
 const uint8_t maxBrightness = 90;
 
-const uint8_t totalWindSegmentsNorthSouth = 5;
-const uint8_t windNorthSouth[totalWindSegmentsNorthSouth * 2] =
-  {0xFE, 0x7E, 0xDD, 0xDD, 0xBB, 0xBB, 0xEB, 0xEB, 0x77, 0xF7};
-const uint8_t totalWindSegmentsWestEast = 7;
-const uint8_t windWestEast[totalWindSegmentsWestEast * 2] =
-  {0x4F, 0xFF, 0x36, 0xFF, 0xF9, 0xFF, 0x7F, 0x7F, 0xFF, 0x4F, 0xFF, 0x36, 0xFF, 0xF9};
-
-const uint16_t hotmk[] PROGMEM = {
-  A2,   200,
-  B2,   200,
-  C3,   200,
-  D3,   200,
-  E3,   200,
-  C3,   200,
-  E3,   200,
-  REST, 200,
-  Dx3,  200,
-  B2,   200,
-  Dx3,  200,
-  REST, 200,
-  D3,   200,
-  Ax2,  200,
-  D3,   200,
-  REST, 200,
-  A2,   200,
-  B2,   200,
-  C3,   200,
-  D3,   200,
-  E3,   200,
-  C3,   200,
-  E3,   200,
-  A3,   200,
-  G3,   200,
-  E3,   200,
-  C3,   200,
-  E3,   200,
-  G3,   500
-};
-
-unsigned long nextNoteTime = 0;
-uint8_t currentNote = 0;
-uint8_t currentSong = 0;
+const uint16_t windNorthSouth[] PROGMEM =
+  {0xFE7E, 0xDDDD, 0xBBBB, 0xEBEB, 0x77F7};
+const uint16_t windWestEast[] PROGMEM =
+  {0x4FFF, 0x36FF, 0xF9FF, 0x7F7F, 0xFF4F, 0xFF36, 0xFFF9};
 
 struct room {
   unsigned int wall : 1;
@@ -86,6 +49,10 @@ struct room {
 struct room cave[mapWidth][mapHeight];
 
 uint8_t playerX, playerY;
+
+unsigned long nextNoteTime = 0;
+uint8_t currentNote = 0;
+uint16_t *currentSong = &hotmk[0];
 
 SevSegShift sevsegshift(
                   SHIFT_PIN_DS,
@@ -198,16 +165,16 @@ void displayPitNearby(unsigned long timer) {
   if (!cave[playerX][playerY].pitNearby) {
     return;
   }
-  uint8_t *maskSegments;
+  uint16_t *maskSegments;
   uint8_t totalMaskSegments, selection;
   if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) <
       (cave[playerX + 1][playerY].wall + cave[playerX - 1][playerY].wall)) {
-    maskSegments = windNorthSouth;
-    totalMaskSegments = totalWindSegmentsNorthSouth;
+    maskSegments = &windNorthSouth[0];
+    totalMaskSegments = sizeof(windNorthSouth) / 2;
     selection = playerX % 2;
   } else {
-    maskSegments = windWestEast;
-    totalMaskSegments = totalWindSegmentsWestEast;
+    maskSegments = &windWestEast[0];
+    totalMaskSegments = sizeof(windWestEast) / 2;
     selection = playerY % 2;
   }
   if (selection) {
@@ -217,7 +184,7 @@ void displayPitNearby(unsigned long timer) {
   }
 }
 
-void displayPitNearbyUp(unsigned long timer, uint8_t *maskSegments, uint8_t maskSegmentCount) {
+void displayPitNearbyUp(unsigned long timer, uint16_t *maskSegments, uint8_t maskSegmentCount) {
   static unsigned long nextAction = 0;
   static uint8_t windOffset = 0;
   if (nextAction > timer) {
@@ -231,14 +198,15 @@ void displayPitNearbyUp(unsigned long timer, uint8_t *maskSegments, uint8_t mask
   }
   uint8_t displaySegments[2];
   sevsegshift.getSegments(displaySegments);
-  displaySegments[0] &= maskSegments[windOffset * 2];
-  displaySegments[1] &= maskSegments[windOffset * 2 + 1];
+  uint16_t word = pgm_read_word(maskSegments + windOffset);
+  displaySegments[0] &= (uint8_t)word;
+  displaySegments[1] &= (uint8_t)(word >> 8);
   sevsegshift.setSegments(displaySegments);
   nextAction = timer + 75;
   windOffset++;
 }
 
-void displayPitNearbyDown(unsigned long timer, uint8_t *maskSegments, uint8_t maskSegmentCount) {
+void displayPitNearbyDown(unsigned long timer, uint16_t *maskSegments, uint8_t maskSegmentCount) {
   static unsigned long nextAction = 0;
   static uint8_t windOffset = 0;
   if (nextAction > timer) {
@@ -252,8 +220,9 @@ void displayPitNearbyDown(unsigned long timer, uint8_t *maskSegments, uint8_t ma
   }
   uint8_t displaySegments[2];
   sevsegshift.getSegments(displaySegments);
-  displaySegments[0] &= maskSegments[windOffset * 2];
-  displaySegments[1] &= maskSegments[windOffset * 2 + 1];
+  uint16_t word = pgm_read_word(maskSegments + windOffset);
+  displaySegments[0] &= (uint8_t)word;
+  displaySegments[1] &= (uint8_t)(word >> 8);
   sevsegshift.setSegments(displaySegments);
   nextAction = timer + 75;
   windOffset--;
@@ -389,32 +358,29 @@ void playNote(uint16_t note) {
 }
 
 void updateAudio(unsigned long timer) {
-  if (currentSong == 0) {
+  if (nextNoteTime == 0) {
     return;
   }
   if (timer < nextNoteTime) {
     return;
   }
-  currentNote++;
-  if (currentNote >= 29) {
+  if (currentNote == 29) {
     // stop
-    playNote(REST);
-    currentSong = 0;
+    nextNoteTime = 0;
     currentNote = 0;
+    playNote(REST);
     return;
   }
-  playNextNote(hotmk, timer);
+  uint32_t dword = pgm_read_dword(currentSong + currentNote * 2);
+  playNote(dword); // take the lower word for the note
+  nextNoteTime = (unsigned long)(uint16_t(dword >> 16)) + timer;
+  currentNote++;
 }
 
-void playNextNote(uint16_t song[], unsigned long timer) {
-  nextNoteTime = pgm_read_word(&song[currentNote*2 + 1]) + timer;
-  playNote(pgm_read_word(&song[currentNote*2]));
-}
-
-void playSong(uint8_t newSong, unsigned long timer) {
+void playSong(uint16_t newSong[]) {
   currentNote = 0;
-  currentSong = newSong;
-  playNextNote(hotmk, timer);
+  nextNoteTime = 1;
+  currentSong = &newSong[0];
 }
 
 void stopSong() {
@@ -449,7 +415,7 @@ void setup() {
 
   updateCaveDisplay();
 
-  playSong(1, millis());
+  playSong(hotmk);
 }
 
 void loop() {
@@ -475,6 +441,7 @@ void loop() {
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
     if (cave[nextPlayerX][nextPlayerY].wall) {
       // wall beep
+      playSong(hotmk);
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;
