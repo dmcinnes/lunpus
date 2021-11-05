@@ -364,14 +364,11 @@ void updateAudio(unsigned long timer) {
   if (timer < nextNoteTime) {
     return;
   }
-  if (currentNote == 29) {
-    // stop
-    nextNoteTime = 0;
-    currentNote = 0;
-    playNote(REST);
+  if (currentNote == pgm_read_word(currentSong)) {
+    stopSong();
     return;
   }
-  uint32_t dword = pgm_read_dword(currentSong + currentNote * 2);
+  uint32_t dword = pgm_read_dword(currentSong + currentNote * 2 + 1);
   playNote(dword); // take the lower word for the note
   nextNoteTime = (unsigned long)(uint16_t(dword >> 16)) + timer;
   currentNote++;
@@ -384,7 +381,8 @@ void playSong(uint16_t newSong[]) {
 }
 
 void stopSong() {
-  currentSong = 0;
+  nextNoteTime = 0;
+  playNote(REST);
 }
 
 void setup() {
