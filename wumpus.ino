@@ -31,10 +31,12 @@ const uint8_t maxBats = 6;
 
 const uint8_t maxBrightness = 90;
 
-const uint16_t windNorthSouth[] PROGMEM =
+const uint16_t windNorthSouthMask[] PROGMEM =
   {0xFE7E, 0xDDDD, 0xBBBB, 0xEBEB, 0x77F7};
-const uint16_t windWestEast[] PROGMEM =
+const uint16_t windEastWestMask[] PROGMEM =
   {0x4FFF, 0x36FF, 0xF9FF, 0x7F7F, 0xFF4F, 0xFF36, 0xFFF9};
+
+const uint16_t wumpusBiteFrames[] PROGMEM = {0x0181, 0x23A3, 0x5454, 0x8808};
 
 struct room {
   unsigned int wall : 1;
@@ -169,12 +171,12 @@ void displayPitNearby(unsigned long timer) {
   uint8_t totalMaskSegments, selection;
   if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) <
       (cave[playerX + 1][playerY].wall + cave[playerX - 1][playerY].wall)) {
-    maskSegments = &windNorthSouth[0];
-    totalMaskSegments = sizeof(windNorthSouth) / 2;
+    maskSegments = &windNorthSouthMask[0];
+    totalMaskSegments = sizeof(windNorthSouthMask) / 2;
     selection = playerX % 2;
   } else {
-    maskSegments = &windWestEast[0];
-    totalMaskSegments = sizeof(windWestEast) / 2;
+    maskSegments = &windEastWestMask[0];
+    totalMaskSegments = sizeof(windEastWestMask) / 2;
     selection = playerY % 2;
   }
   if (selection) {
@@ -253,6 +255,23 @@ void displayWumpusNearby(unsigned long timer) {
       }
     }
     sevsegshift.setBrightness(currentBrightness);
+  }
+}
+
+void displayWumpusBite(unsigned long timer) {
+  static unsigned long nextAction = 0;
+  static uint8_t wumpusFrameOffset = 0;
+  if (nextAction < timer) {
+    if (wumpusFrameOffset >= sizeof(wumpusBiteFrames) / 2) {
+      wumpusFrameOffset = 0;
+    }
+    uint8_t displaySegments[2];
+    uint16_t word = pgm_read_word(&wumpusBiteFrames[0] + wumpusFrameOffset);
+    displaySegments[0] = (uint8_t)(word >> 8);
+    displaySegments[1] = (uint8_t)word;
+    sevsegshift.setSegments(displaySegments);
+    wumpusFrameOffset++;
+    nextAction = timer + 150;
   }
 }
 
