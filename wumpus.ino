@@ -490,6 +490,7 @@ void loop() {
       // wall beep
       playSong(bonk);
     } else {
+      stopSong();
       playerX = nextPlayerX;
       playerY = nextPlayerY;
       setDefaultBrightness();
