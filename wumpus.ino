@@ -190,6 +190,7 @@ void displayPitNearby(unsigned long timer) {
 void displayPitNearbyUp(unsigned long timer, uint16_t *maskSegments, uint8_t maskSegmentCount) {
   static unsigned long nextAction = 0;
   static uint8_t windOffset = 0;
+  playWind(windOffset);
   if (nextAction > timer) {
     return;
   }
@@ -212,6 +213,7 @@ void displayPitNearbyUp(unsigned long timer, uint16_t *maskSegments, uint8_t mas
 void displayPitNearbyDown(unsigned long timer, uint16_t *maskSegments, uint8_t maskSegmentCount) {
   static unsigned long nextAction = 0;
   static uint8_t windOffset = 0;
+  playWind(windOffset);
   if (nextAction > timer) {
     return;
   }
@@ -229,6 +231,16 @@ void displayPitNearbyDown(unsigned long timer, uint16_t *maskSegments, uint8_t m
   sevsegshift.setSegments(displaySegments);
   nextAction = timer + 75;
   windOffset--;
+}
+
+void playWind(uint8_t windOffset) {
+  // don't play if we're already playing some music
+  if (nextNoteTime > 0) {
+    return;
+  }
+  // clamp to a sane value
+  windOffset = (windOffset > 10) ? 0 : windOffset;
+  playNote(random(10, 20 + windOffset));
 }
 
 void displayWumpusNearby(unsigned long timer) {
