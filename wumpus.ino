@@ -407,6 +407,10 @@ void updateAudio(unsigned long timer) {
     return;
   }
   uint32_t dword = pgm_read_dword(currentSong + currentNote * 2 + 1);
+  if (dword == 0xFFFFFFFF) {
+    currentNote = 0;
+    return;
+  }
   playNote(dword); // take the lower word for the note
   nextNoteTime = (unsigned long)(uint16_t(dword >> 16)) + timer;
   currentNote++;
@@ -477,7 +481,7 @@ void loop() {
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
     if (cave[nextPlayerX][nextPlayerY].wall) {
       // wall beep
-      playSong(bump);
+      playSong(bonk);
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;

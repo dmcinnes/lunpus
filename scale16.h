@@ -1,4 +1,5 @@
 #define REST 0
+#define REPEAT 0xFFFF
 
 #define A0 1818 //909
 #define B0 1612 //806

@@ -53,7 +53,7 @@ const uint16_t chopinBlock[] PROGMEM = {
   A0,   500
 };
 
-const uint16_t bump[] PROGMEM = {
+const uint16_t bonk[] PROGMEM = {
   1,
   3000, 200
 };
@@ -63,4 +63,11 @@ const uint16_t batFlap[] PROGMEM = {
   B3, 50,
   C4, 50,
   G3, 50
+};
+
+const uint16_t snore[] PROGMEM = {
+  3,
+  3000, 10,
+  4000, 10,
+  REPEAT, REPEAT
 };
