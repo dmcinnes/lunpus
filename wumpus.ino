@@ -37,6 +37,7 @@ const uint16_t windEastWestMask[] PROGMEM =
   {0x4FFF, 0x36FF, 0xF9FF, 0x7F7F, 0xFF4F, 0xFF36, 0xFFF9};
 
 const uint16_t wumpusBiteFrames[] PROGMEM = {0x0181, 0x23A3, 0x5454, 0x8808};
+const uint16_t batFlapFrames[] PROGMEM = {0x2323, 0x4040, 0x0C18, 0x4040};
 
 struct room {
   unsigned int wall : 1;
@@ -275,6 +276,24 @@ void displayWumpusBite(unsigned long timer) {
   }
 }
 
+void displayBatFlap(unsigned long timer) {
+  static unsigned long nextAction = 0;
+  static uint8_t batFlapFrameOffset = 255;
+  if (nextAction < timer) {
+    if (batFlapFrameOffset >= sizeof(batFlapFrames) / 2) {
+      batFlapFrameOffset = 0;
+      playSong(batFlap);
+    }
+    uint8_t displaySegments[2];
+    uint16_t word = pgm_read_word(&batFlapFrames[0] + batFlapFrameOffset);
+    displaySegments[0] = (uint8_t)(word >> 8);
+    displaySegments[1] = (uint8_t)word;
+    sevsegshift.setSegments(displaySegments);
+    nextAction = timer + ((batFlapFrameOffset == 0) ? 150 : 100);
+    batFlapFrameOffset++;
+  }
+}
+
 void setupMap() {
   uint8_t i, j, x, y, count;
 
@@ -458,7 +477,7 @@ void loop() {
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
     if (cave[nextPlayerX][nextPlayerY].wall) {
       // wall beep
-      playSong(hotmk);
+      playSong(bump);
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;

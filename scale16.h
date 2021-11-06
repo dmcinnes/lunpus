@@ -1,8 +1,8 @@
 #define REST 0
 
-#define A1 909
-#define B1 806
-#define C2 769
+#define A0 1818 //909
+#define B0 1612 //806
+#define C1 1500 //769
 
 #define A2 455
 #define Ax2 429
