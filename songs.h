@@ -65,7 +65,14 @@ const uint16_t batFlap[] PROGMEM = {
   G3, 50
 };
 
-const uint16_t snore[] PROGMEM = {
+const uint16_t snoreUp[] PROGMEM = {
+  3,
+  1500, 10,
+  3000, 10,
+  REPEAT, REPEAT
+};
+
+const uint16_t snoreDown[] PROGMEM = {
   3,
   3000, 10,
   4000, 10,

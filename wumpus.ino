@@ -238,9 +238,12 @@ void displayWumpusNearby(unsigned long timer) {
 
   static unsigned long nextAction = 0;
   if (nextAction < timer) {
-    static int16_t currentBrightness;
+    static int16_t currentBrightness = 0;
     static bool direction = true;
     if (direction) {
+      if (currentBrightness == 0) {
+        playSong(snoreUp);
+      }
       currentBrightness += 1;
       nextAction = timer + 10;
       if (currentBrightness >= maxBrightness) {
@@ -248,11 +251,15 @@ void displayWumpusNearby(unsigned long timer) {
         nextAction += 2000;
       }
     } else {
+      if (currentBrightness >= maxBrightness) {
+        playSong(snoreDown);
+      }
       currentBrightness -= 1;
       nextAction = timer + 10;
       if (currentBrightness <= 0) {
         direction = true;
         nextAction += 2000;
+        stopSong();
       }
     }
     sevsegshift.setBrightness(currentBrightness);
