@@ -504,6 +504,9 @@ void playState(unsigned long timer) {
     } else if (nextRoom.superbat) {
       currentStateFn = &superbatState;
       return;
+    } else if (nextRoom.wumpus) {
+      currentStateFn = &wumpusEatState;
+      return;
     } else {
       stopSong();
       playerX = nextPlayerX;
@@ -532,6 +535,21 @@ void superbatState(unsigned long timer) {
       playerX = random(mapWidth);
       playerY = random(mapHeight);
     } while (cave[playerX][playerY].wall);
+    updateCaveDisplay();
+    currentStateFn = &playState;
+  }
+}
+
+void wumpusEatState(unsigned long timer) {
+  static unsigned long nextAction = 0;
+  if (nextAction == 0) {
+    nextAction = timer + 600;
+    /* playSong(chopinBlock, chopinBlockDurations); */
+    setDefaultBrightness();
+  }
+  displayWumpusBite(timer);
+  if (timer > nextAction) {
+    nextAction = 0;
     updateCaveDisplay();
     currentStateFn = &playState;
   }
