@@ -294,7 +294,7 @@ void displayBatFlap(unsigned long timer) {
   }
 }
 
-void adjacentRooms(uint8_t x, uint8_t y, struct room *adjacentRooms[]) {
+void setAdjacentRooms(uint8_t x, uint8_t y, struct room *adjacentRooms[]) {
   adjacentRooms[0] = &(cave[x - 1][y - 1]);
   adjacentRooms[1] = &(cave[x - 1][y    ]);
   adjacentRooms[2] = &(cave[x - 1][y + 1]);
@@ -337,7 +337,7 @@ void setupMap() {
       y = random(mapHeight);
     } while (cave[x][y].wall);
     cave[x][y].pit = 1;
-    adjacentRooms(x, y, adjacentRooms);
+    setAdjacentRooms(x, y, adjacentRooms);
     for (j = 0; j < 8; j++) {
       (*adjacentRooms[j]).pitNearby = 1;
     }
@@ -351,7 +351,7 @@ void setupMap() {
       y = random(mapHeight);
     } while (cave[x][y].wall);
     cave[x][y].superbat = 1;
-    adjacentRooms(x, y, adjacentRooms);
+    setAdjacentRooms(x, y, adjacentRooms);
     for (j = 0; j < 8; j++) {
       (*adjacentRooms[j]).batsNearby = 1;
     }
@@ -362,7 +362,7 @@ void setupMap() {
     y = random(mapHeight);
   } while (cave[x][y].wall);
   cave[x][y].wumpus = 1;
-  adjacentRooms(x, y, adjacentRooms);
+  setAdjacentRooms(x, y, adjacentRooms);
   for (j = 0; j < 8; j++) {
     (*adjacentRooms[j]).wumpusNearby = 1;
   }
