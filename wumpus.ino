@@ -36,6 +36,7 @@ uint8_t playerX, playerY;
 unsigned long nextNoteTime = 0;
 uint8_t currentNote = 0;
 uint16_t *currentSong = &hotmk[0];
+uint8_t *currentSongDurations = &hotmkDurations[0];
 
 SevSegShift sevsegshift(
                   SHIFT_PIN_DS,
@@ -234,7 +235,7 @@ void displayWumpusNearby(unsigned long timer) {
     static bool direction = true;
     if (direction) {
       if (currentBrightness == 0) {
-        playSong(snoreUp);
+        playSong(snoreUp, snoreUpDurations);
       }
       currentBrightness += 1;
       nextAction = timer + 10;
@@ -244,7 +245,7 @@ void displayWumpusNearby(unsigned long timer) {
       }
     } else {
       if (currentBrightness >= maxBrightness) {
-        playSong(snoreDown);
+        playSong(snoreDown, snoreDownDurations);
       }
       currentBrightness -= 1;
       nextAction = timer + 10;
@@ -281,7 +282,7 @@ void displayBatFlap(unsigned long timer) {
   if (nextAction < timer) {
     if (batFlapFrameOffset >= sizeof(batFlapFrames) / 2) {
       batFlapFrameOffset = 0;
-      playSong(batFlap);
+      playSong(batFlap, batFlapDurations);
     }
     uint8_t displaySegments[2];
     uint16_t word = pgm_read_word(&batFlapFrames[0] + batFlapFrameOffset);
@@ -401,24 +402,26 @@ void updateAudio(unsigned long timer) {
   if (timer < nextNoteTime) {
     return;
   }
-  if (currentNote == pgm_read_word(currentSong)) {
+  if (currentNote == pgm_read_byte(currentSongDurations)) {
     stopSong();
     return;
   }
-  uint32_t dword = pgm_read_dword(currentSong + currentNote * 2 + 1);
-  if (dword == 0xFFFFFFFF) {
+  uint16_t note = pgm_read_word(currentSong + currentNote);
+  if (note == REPEAT) {
     currentNote = 0;
     return;
   }
-  playNote(dword); // take the lower word for the note
-  nextNoteTime = (unsigned long)(uint16_t(dword >> 16)) + timer;
+  uint8_t duration = pgm_read_byte(currentSongDurations + currentNote + 1);
+  playNote(note);
+  nextNoteTime = duration + timer;
   currentNote++;
 }
 
-void playSong(uint16_t newSong[]) {
+void playSong(uint16_t newSong[], uint8_t newSongDurations[]) {
   currentNote = 0;
   nextNoteTime = 1;
   currentSong = &newSong[0];
+  currentSongDurations = &newSongDurations[0];
 }
 
 void stopSong() {
@@ -454,7 +457,7 @@ void setup() {
 
   updateCaveDisplay();
 
-  playSong(hotmk);
+  playSong(hotmk, hotmkDurations);
 }
 
 void loop() {
@@ -497,7 +500,7 @@ void playState(unsigned long timer) {
     struct room nextRoom = cave[nextPlayerX][nextPlayerY];
     if (nextRoom.wall) {
       // wall beep
-      playSong(bonk);
+      playSong(bonk, bonkDurations);
     } else if (nextRoom.superbat) {
       currentStateFn = &superbatState;
       return;
@@ -524,7 +527,7 @@ void superbatState(unsigned long timer) {
   displayBatFlap(timer);
   if (timer > nextAction) {
     nextAction = 0;
-    playSong(batSet);
+    playSong(batSet, batSetDurations);
     do {
       playerX = random(mapWidth);
       playerY = random(mapHeight);
