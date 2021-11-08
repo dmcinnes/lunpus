@@ -1,3 +1,4 @@
+// Hall of the Mountain King by Edvard Grieg
 const uint16_t hotmk[] PROGMEM = {
   29,
   A2,   200,
@@ -31,6 +32,7 @@ const uint16_t hotmk[] PROGMEM = {
   G3,   500
 };
 
+// Funeral March by Chopin
 const uint16_t chopinBlock[] PROGMEM = {
   18,
   A0,   500,
@@ -63,6 +65,12 @@ const uint16_t batFlap[] PROGMEM = {
   B3, 50,
   C4, 50,
   G3, 50
+};
+
+const uint16_t batSet[] PROGMEM = {
+  2,
+  E3, 300,
+  A2, 100
 };
 
 const uint16_t snoreUp[] PROGMEM = {

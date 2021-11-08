@@ -1,13 +1,11 @@
-#include <avr/pgmspace.h>
-#include "SevSegShift.h"
-#include "scale16.h"
-#include "songs.h"
+#include "wumpus.h"
 
 #define SHIFT_PIN_SHCP 5
 #define SHIFT_PIN_STCP 4
 #define SHIFT_PIN_DS   3
 
-enum button{north, south, east, west};
+typedef void (*stateFn)(unsigned long);
+stateFn currentStateFn = &playState;
 
 // north, south, east, west
 const uint8_t buttonPins[4] = {9, 8, 7, 10};
@@ -30,24 +28,6 @@ const uint8_t minBats = 2;
 const uint8_t maxBats = 6;
 
 const uint8_t maxBrightness = 90;
-
-const uint16_t windNorthSouthMask[] PROGMEM =
-  {0xFE7E, 0xDDDD, 0xBBBB, 0xEBEB, 0x77F7};
-const uint16_t windEastWestMask[] PROGMEM =
-  {0x4FFF, 0x36FF, 0xF9FF, 0x7F7F, 0xFF4F, 0xFF36, 0xFFF9};
-
-const uint16_t wumpusBiteFrames[] PROGMEM = {0x0181, 0x23A3, 0x5454, 0x8808};
-const uint16_t batFlapFrames[] PROGMEM = {0x2323, 0x4040, 0x0C18, 0x4040};
-
-struct room {
-  unsigned int wall : 1;
-  unsigned int pit : 1;
-  unsigned int bats : 1;
-  unsigned int wumpus : 1;
-  unsigned int wumpusNearby : 1;
-  unsigned int pitNearby : 1;
-  unsigned int batsNearby : 1;
-};
 
 struct room cave[mapWidth][mapHeight];
 
@@ -103,7 +83,7 @@ void displayThings() {
   if (cave[playerX][playerY].pit) {
     sevsegshift.setChars("P");
   }
-  if (cave[playerX][playerY].bats) {
+  if (cave[playerX][playerY].superbat) {
     sevsegshift.setChars("b");
   }
   if (cave[playerX][playerY].wumpus) {
@@ -360,7 +340,7 @@ void setupMap() {
       x = random(mapWidth);
       y = random(mapHeight);
     } while (cave[x][y].wall);
-    cave[x][y].bats = 1;
+    cave[x][y].superbat = 1;
     cave[x - 1][y - 1].batsNearby = 1;
     cave[x - 1][y    ].batsNearby = 1;
     cave[x - 1][y + 1].batsNearby = 1;
@@ -481,6 +461,22 @@ void loop() {
   static unsigned long timer;
   timer = millis();
 
+  (*currentStateFn)(timer);
+
+  updateAudio(timer);
+
+  sevsegshift.refreshDisplay(); // Must run repeatedly
+}
+
+/* #### Game States #### */
+
+void introState(unsigned long timer) {
+}
+
+void startState(unsigned long timer) {
+}
+
+void playState(unsigned long timer) {
   uint8_t nextPlayerX = playerX;
   uint8_t nextPlayerY = playerY;
 
@@ -498,9 +494,13 @@ void loop() {
   }
 
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
-    if (cave[nextPlayerX][nextPlayerY].wall) {
+    struct room nextRoom = cave[nextPlayerX][nextPlayerY];
+    if (nextRoom.wall) {
       // wall beep
       playSong(bonk);
+    } else if (nextRoom.superbat) {
+      currentStateFn = &superbatState;
+      return;
     } else {
       stopSong();
       playerX = nextPlayerX;
@@ -514,8 +514,22 @@ void loop() {
   displayBatsNearby(timer);
   displayPitNearby(timer);
   displayWumpusNearby(timer);
+}
 
-  updateAudio(timer);
-
-  sevsegshift.refreshDisplay(); // Must run repeatedly
+void superbatState(unsigned long timer) {
+  static unsigned long nextAction = 0;
+  if (nextAction == 0) {
+    nextAction = timer + 3200;
+  }
+  displayBatFlap(timer);
+  if (timer > nextAction) {
+    nextAction = 0;
+    playSong(batSet);
+    do {
+      playerX = random(mapWidth);
+      playerY = random(mapHeight);
+    } while (cave[playerX][playerY].wall);
+    updateCaveDisplay();
+    currentStateFn = &playState;
+  }
 }
