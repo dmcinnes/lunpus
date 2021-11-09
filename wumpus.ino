@@ -470,14 +470,14 @@ void playState(unsigned long timer) {
 
   struct room currentRoom = cave[playerX][playerY];
 
-  if (currentRoom.superbat) {
+  if (currentRoom.wumpus) {
+    currentStateFn = &wumpusEatState;
+    return;
+  } else if (currentRoom.superbat) {
     currentStateFn = &superbatState;
     return;
   } else if (currentRoom.pit) {
     currentStateFn = &pitfallState;
-    return;
-  } else if (currentRoom.wumpus) {
-    currentStateFn = &wumpusEatState;
     return;
   }
 
