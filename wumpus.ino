@@ -391,7 +391,6 @@ void playNote(uint16_t note) {
     DDRA &= ~(1 << DDA6); // disable output pin
     return;
   }
-  TCNT1 = 0;            // reset the counter
   OCR1A = note;         // set pitch
   DDRA |= (1 << DDA6);  // enable output pin
 }
@@ -545,13 +544,15 @@ void wumpusEatState(unsigned long timer) {
   static unsigned long nextAction = 0;
   if (nextAction == 0) {
     nextAction = timer + 600;
-    /* playSong(chopinBlock, chopinBlockDurations); */
+    playSong(chopinBlock, chopinBlockDurations);
     setDefaultBrightness();
   }
   displayWumpusBite(timer);
   if (timer > nextAction) {
     nextAction = 0;
-    updateCaveDisplay();
-    currentStateFn = &playState;
+    currentStateFn = &youLoseState;
   }
+}
+
+void youLoseState(unsigned long timer) {
 }
