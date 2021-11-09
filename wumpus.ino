@@ -344,8 +344,14 @@ void setupMap() {
 }
 
 void setupPlayer() {
-  playerX = 1; // + random(mapWidth - 2);
-  playerY = 1; // + random(mapHeight - 2);
+  struct room candidate;
+  struct point pt;
+  do {
+    pt = randomRoom();
+    candidate = cave[pt.x][pt.y];
+  } while (candidate.wumpus || candidate.superbat || candidate.pit);
+  playerX = pt.x;
+  playerY = pt.y;
 }
 
 void setDefaultBrightness() {
