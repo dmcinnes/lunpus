@@ -464,6 +464,29 @@ void playState(unsigned long timer) {
   uint8_t nextPlayerX = playerX;
   uint8_t nextPlayerY = playerY;
 
+  struct room currentRoom = cave[playerX][playerY];
+
+  if (currentRoom.superbat) {
+    currentStateFn = &superbatState;
+    return;
+  } else if (currentRoom.pit) {
+    currentStateFn = &pitfallState;
+    return;
+  } else if (currentRoom.wumpus) {
+    currentStateFn = &wumpusEatState;
+    return;
+  }
+
+  if (currentRoom.batsNearby) {
+    displayBatsNearby(timer);
+  }
+  if (currentRoom.pitNearby) {
+    displayPitNearby(timer);
+  }
+  if (currentRoom.wumpusNearby) {
+    displayWumpusNearby(timer);
+  }
+
   if (buttonState(north)) {
     nextPlayerY--;
   }
@@ -477,37 +500,18 @@ void playState(unsigned long timer) {
     nextPlayerX--;
   }
 
-  struct room currentRoom = cave[nextPlayerX][nextPlayerY];
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
+    currentRoom = cave[nextPlayerX][nextPlayerY];
     stopSong();
     if (currentRoom.wall) {
       // wall beep
       playSong(bonk, bonkDurations);
-    } else if (currentRoom.superbat) {
-      currentStateFn = &superbatState;
-      return;
-    } else if (currentRoom.pit) {
-      currentStateFn = &pitfallState;
-      return;
-    } else if (currentRoom.wumpus) {
-      currentStateFn = &wumpusEatState;
-      return;
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;
       setDefaultBrightness();
       updateCaveDisplay();
     }
-  }
-
-  if (currentRoom.batsNearby) {
-    displayBatsNearby(timer);
-  }
-  if (currentRoom.pitNearby) {
-    displayPitNearby(timer);
-  }
-  if (currentRoom.wumpusNearby) {
-    displayWumpusNearby(timer);
   }
 }
 
