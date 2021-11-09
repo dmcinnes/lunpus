@@ -34,5 +34,10 @@ struct room {
   unsigned int batsNearby : 1;
 };
 
+struct point {
+  unsigned int x : 4;
+  unsigned int y : 4;
+};
+
 const uint16_t titleFrames[] PROGMEM =
   {0x0006, 0x0076, 0x0634, 0x761C};

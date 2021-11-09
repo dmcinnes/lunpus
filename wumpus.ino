@@ -282,8 +282,18 @@ void setAdjacentRooms(uint8_t x, uint8_t y, struct room *adjacentRooms[]) {
   adjacentRooms[7] = &(cave[x + 1][y + 1]);
 }
 
+struct point randomRoom() {
+  struct point pt;
+  do {
+    pt.x = random(mapWidth);
+    pt.y = random(mapHeight);
+  } while (cave[pt.x][pt.y].wall);
+  return pt;
+}
+
 void setupMap() {
-  uint8_t i, j, x, y, count;
+  uint8_t i, j, count;
+  struct point pt;
 
   for (i = 0; i < mapWidth; i++) {
     cave[i][0].wall = 1;
@@ -297,11 +307,8 @@ void setupMap() {
   count = minWalls + random(maxWalls - minWalls);
 
   for (i = 0; i < count; i++) {
-    do {
-      x = random(mapWidth);
-      y = random(mapHeight);
-    } while (cave[x][y].wall);
-    cave[x][y].wall = 1;
+    pt = randomRoom();
+    cave[pt.x][pt.y].wall = 1;
   }
 
   count = minPits + random(maxPits - minPits);
@@ -309,12 +316,9 @@ void setupMap() {
   struct room *adjacentRooms[8];
 
   for (i = 0; i < count; i++) {
-    do {
-      x = random(mapWidth);
-      y = random(mapHeight);
-    } while (cave[x][y].wall);
-    cave[x][y].pit = 1;
-    setAdjacentRooms(x, y, adjacentRooms);
+    pt = randomRoom();
+    cave[pt.x][pt.y].pit = 1;
+    setAdjacentRooms(pt.x, pt.y, adjacentRooms);
     for (j = 0; j < 8; j++) {
       (*adjacentRooms[j]).pitNearby = 1;
     }
@@ -323,23 +327,17 @@ void setupMap() {
   count = minBats + random(maxBats - minBats);
 
   for (i = 0; i < count; i++) {
-    do {
-      x = random(mapWidth);
-      y = random(mapHeight);
-    } while (cave[x][y].wall);
-    cave[x][y].superbat = 1;
-    setAdjacentRooms(x, y, adjacentRooms);
+    pt = randomRoom();
+    cave[pt.x][pt.y].superbat = 1;
+    setAdjacentRooms(pt.x, pt.y, adjacentRooms);
     for (j = 0; j < 8; j++) {
       (*adjacentRooms[j]).batsNearby = 1;
     }
   }
 
-  do {
-    x = random(mapWidth);
-    y = random(mapHeight);
-  } while (cave[x][y].wall);
-  cave[x][y].wumpus = 1;
-  setAdjacentRooms(x, y, adjacentRooms);
+  pt = randomRoom();
+  cave[pt.x][pt.y].wumpus = 1;
+  setAdjacentRooms(pt.x, pt.y, adjacentRooms);
   for (j = 0; j < 8; j++) {
     (*adjacentRooms[j]).wumpusNearby = 1;
   }
