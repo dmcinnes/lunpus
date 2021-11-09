@@ -271,15 +271,15 @@ void displayBatFlap(unsigned long timer) {
   }
 }
 
-void setAdjacentRooms(uint8_t x, uint8_t y, struct room *adjacentRooms[]) {
-  adjacentRooms[0] = &(cave[x - 1][y - 1]);
-  adjacentRooms[1] = &(cave[x - 1][y    ]);
-  adjacentRooms[2] = &(cave[x - 1][y + 1]);
-  adjacentRooms[3] = &(cave[x    ][y - 1]);
-  adjacentRooms[4] = &(cave[x    ][y + 1]);
-  adjacentRooms[5] = &(cave[x + 1][y - 1]);
-  adjacentRooms[6] = &(cave[x + 1][y    ]);
-  adjacentRooms[7] = &(cave[x + 1][y + 1]);
+void setAdjacentRooms(struct point pt, struct room *adjacentRooms[]) {
+  adjacentRooms[0] = &(cave[pt.x - 1][pt.y - 1]);
+  adjacentRooms[1] = &(cave[pt.x - 1][pt.y    ]);
+  adjacentRooms[2] = &(cave[pt.x - 1][pt.y + 1]);
+  adjacentRooms[3] = &(cave[pt.x    ][pt.y - 1]);
+  adjacentRooms[4] = &(cave[pt.x    ][pt.y + 1]);
+  adjacentRooms[5] = &(cave[pt.x + 1][pt.y - 1]);
+  adjacentRooms[6] = &(cave[pt.x + 1][pt.y    ]);
+  adjacentRooms[7] = &(cave[pt.x + 1][pt.y + 1]);
 }
 
 struct point randomRoom() {
@@ -318,7 +318,7 @@ void setupMap() {
   for (i = 0; i < count; i++) {
     pt = randomRoom();
     cave[pt.x][pt.y].pit = 1;
-    setAdjacentRooms(pt.x, pt.y, adjacentRooms);
+    setAdjacentRooms(pt, adjacentRooms);
     for (j = 0; j < 8; j++) {
       (*adjacentRooms[j]).pitNearby = 1;
     }
@@ -329,7 +329,7 @@ void setupMap() {
   for (i = 0; i < count; i++) {
     pt = randomRoom();
     cave[pt.x][pt.y].superbat = 1;
-    setAdjacentRooms(pt.x, pt.y, adjacentRooms);
+    setAdjacentRooms(pt, adjacentRooms);
     for (j = 0; j < 8; j++) {
       (*adjacentRooms[j]).batsNearby = 1;
     }
@@ -337,7 +337,7 @@ void setupMap() {
 
   pt = randomRoom();
   cave[pt.x][pt.y].wumpus = 1;
-  setAdjacentRooms(pt.x, pt.y, adjacentRooms);
+  setAdjacentRooms(pt, adjacentRooms);
   for (j = 0; j < 8; j++) {
     (*adjacentRooms[j]).wumpusNearby = 1;
   }
