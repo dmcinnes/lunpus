@@ -80,25 +80,9 @@ void updateCaveDisplay() {
   sevsegshift.setSegments(display);
 }
 
-void displayThings() {
-  if (cave[playerX][playerY].pit) {
-    sevsegshift.setChars("P");
-  }
-  if (cave[playerX][playerY].superbat) {
-    sevsegshift.setChars("b");
-  }
-  if (cave[playerX][playerY].wumpus) {
-    sevsegshift.setChars("uu");
-  }
-}
-
 enum batStates{batStartNorth, batEndNorth, batStartSouth, batEndSouth, batClear, batReset};
 
 void displayBatsNearby(unsigned long timer) {
-  if (!cave[playerX][playerY].batsNearby) {
-    return;
-  }
-
   static unsigned long nextAction = 0;
   if (nextAction < timer) {
     static bool batPos;
@@ -146,9 +130,6 @@ void displayBatsNearby(unsigned long timer) {
 }
 
 void displayPitNearby(unsigned long timer) {
-  if (!cave[playerX][playerY].pitNearby) {
-    return;
-  }
   uint16_t *maskSegments;
   uint8_t totalMaskSegments, selection;
   if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) <
@@ -225,10 +206,6 @@ void playWind(uint8_t windOffset) {
 }
 
 void displayWumpusNearby(unsigned long timer) {
-  if (!cave[playerX][playerY].wumpusNearby) {
-    return;
-  }
-
   static unsigned long nextAction = 0;
   if (nextAction < timer) {
     static int16_t currentBrightness = 0;
@@ -500,30 +477,38 @@ void playState(unsigned long timer) {
     nextPlayerX--;
   }
 
+  struct room currentRoom = cave[nextPlayerX][nextPlayerY];
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
-    struct room nextRoom = cave[nextPlayerX][nextPlayerY];
-    if (nextRoom.wall) {
+    stopSong();
+    if (currentRoom.wall) {
       // wall beep
       playSong(bonk, bonkDurations);
-    } else if (nextRoom.superbat) {
+    } else if (currentRoom.superbat) {
       currentStateFn = &superbatState;
       return;
-    } else if (nextRoom.wumpus) {
+    } else if (currentRoom.pit) {
+      currentStateFn = &pitfallState;
+      return;
+    } else if (currentRoom.wumpus) {
       currentStateFn = &wumpusEatState;
       return;
     } else {
-      stopSong();
       playerX = nextPlayerX;
       playerY = nextPlayerY;
       setDefaultBrightness();
       updateCaveDisplay();
-      displayThings();
     }
   }
 
-  displayBatsNearby(timer);
-  displayPitNearby(timer);
-  displayWumpusNearby(timer);
+  if (currentRoom.batsNearby) {
+    displayBatsNearby(timer);
+  }
+  if (currentRoom.pitNearby) {
+    displayPitNearby(timer);
+  }
+  if (currentRoom.wumpusNearby) {
+    displayWumpusNearby(timer);
+  }
 }
 
 void superbatState(unsigned long timer) {
@@ -542,6 +527,10 @@ void superbatState(unsigned long timer) {
     updateCaveDisplay();
     currentStateFn = &playState;
   }
+}
+
+void pitfallState(unsigned long) {
+  sevsegshift.setChars("P");
 }
 
 void wumpusEatState(unsigned long timer) {
