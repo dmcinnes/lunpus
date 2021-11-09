@@ -391,6 +391,10 @@ void playNote(uint16_t note) {
     DDRA &= ~(1 << DDA6); // disable output pin
     return;
   }
+  // only reset the counter when the note changes
+  if (OCR1A != note) {
+    TCNT1 = 0;            // reset the counter
+  }
   OCR1A = note;         // set pitch
   DDRA |= (1 << DDA6);  // enable output pin
 }
