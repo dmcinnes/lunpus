@@ -5,7 +5,7 @@
 #define SHIFT_PIN_DS   3
 
 typedef void (*stateFn)(unsigned long);
-stateFn currentStateFn = &playState;
+stateFn currentStateFn = &introState;
 
 // north, south, east, west
 const uint8_t buttonPins[4] = {9, 8, 7, 10};
@@ -437,11 +437,6 @@ void setup() {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
 
-  setupMap();
-  setupPlayer();
-
-  updateCaveDisplay();
-
   playSong(hotmk, hotmkDurations);
 }
 
@@ -459,9 +454,26 @@ void loop() {
 /* #### Game States #### */
 
 void introState(unsigned long timer) {
+  static unsigned long nextAction = 0;
+  static uint8_t offset = 0;
+  if (nextAction < timer) {
+    nextAction = timer + 400;
+    uint8_t text[2];
+    text[0] = pgm_read_byte(&introText[offset]);
+    text[1] = pgm_read_byte(&introText[offset + 1]);
+    sevsegshift.setSegments(text);
+    offset++;
+    if (offset == sizeof(introText)) {
+      currentStateFn = &startState;
+    }
+  }
 }
 
 void startState(unsigned long timer) {
+  setupMap();
+  setupPlayer();
+  updateCaveDisplay();
+  currentStateFn = &playState;
 }
 
 void playState(unsigned long timer) {
