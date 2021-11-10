@@ -131,25 +131,18 @@ void displayBatsNearby(unsigned long timer) {
 
 void displayPitNearby(unsigned long timer) {
   uint16_t *maskSegments;
-  uint8_t totalMaskSegments, selection;
+  uint8_t totalMaskSegments, goingUp;
   if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) <
       (cave[playerX + 1][playerY].wall + cave[playerX - 1][playerY].wall)) {
     maskSegments = &windNorthSouthMask[0];
     totalMaskSegments = sizeof(windNorthSouthMask) / 2;
-    selection = playerX % 2;
+    goingUp = playerX % 2;
   } else {
     maskSegments = &windEastWestMask[0];
     totalMaskSegments = sizeof(windEastWestMask) / 2;
-    selection = playerY % 2;
+    goingUp = playerY % 2;
   }
-  if (selection) {
-    displayPitNearbyUp(timer, maskSegments, totalMaskSegments);
-  } else {
-    displayPitNearbyDown(timer, maskSegments, totalMaskSegments);
-  }
-}
 
-void displayPitNearbyUp(unsigned long timer, uint16_t *maskSegments, uint8_t maskSegmentCount) {
   static unsigned long nextAction = 0;
   static uint8_t windOffset = 0;
   playWind(windOffset);
@@ -157,7 +150,12 @@ void displayPitNearbyUp(unsigned long timer, uint16_t *maskSegments, uint8_t mas
     return;
   }
   updateCaveDisplay();
-  if (windOffset == maskSegmentCount) {
+  if (windOffset == 0xFF) { // wrapped around
+    windOffset = totalMaskSegments - 1;
+    nextAction = timer + 400 + random(600);
+    return;
+  }
+  if (goingUp && windOffset == totalMaskSegments) {
     windOffset = 0;
     nextAction = timer + 400 + random(600);
     return;
@@ -169,30 +167,7 @@ void displayPitNearbyUp(unsigned long timer, uint16_t *maskSegments, uint8_t mas
   displaySegments[1] &= (uint8_t)(word >> 8);
   sevsegshift.setSegments(displaySegments);
   nextAction = timer + 75;
-  windOffset++;
-}
-
-void displayPitNearbyDown(unsigned long timer, uint16_t *maskSegments, uint8_t maskSegmentCount) {
-  static unsigned long nextAction = 0;
-  static uint8_t windOffset = 0;
-  playWind(windOffset);
-  if (nextAction > timer) {
-    return;
-  }
-  updateCaveDisplay();
-  if (windOffset == 0xFF) { // wrapped around
-    windOffset = maskSegmentCount - 1;
-    nextAction = timer + 400 + random(600);
-    return;
-  }
-  uint8_t displaySegments[2];
-  sevsegshift.getSegments(displaySegments);
-  uint16_t word = pgm_read_word(maskSegments + windOffset);
-  displaySegments[0] &= (uint8_t)word;
-  displaySegments[1] &= (uint8_t)(word >> 8);
-  sevsegshift.setSegments(displaySegments);
-  nextAction = timer + 75;
-  windOffset--;
+  windOffset += (goingUp) ? +1 : -1;
 }
 
 void playWind(uint8_t windOffset) {
