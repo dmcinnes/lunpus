@@ -7,15 +7,15 @@
 typedef void (*stateFn)(unsigned long);
 stateFn currentStateFn = &introState;
 
-// north, south, east, west
-const uint8_t buttonPins[4] = {9, 8, 7, 10};
+// north, south, east, west, arrow
+const uint8_t buttonPins[5] = {9, 8, 7, 10, 0};
 
 const uint8_t northWall[2] = {0x01, 0x81};
 const uint8_t southWall[2] = {0x88, 0x08};
 const uint8_t eastWall[2]  = {0x00, 0x06};
 const uint8_t westWall[2]  = {0x30, 0x00};
 
-uint16_t buttonStates[4] = {};
+uint16_t buttonStates[5] = {};
 
 const uint8_t mapWidth = 12;
 const uint8_t mapHeight = 12;
@@ -246,6 +246,21 @@ void displayBatFlap(unsigned long timer) {
   }
 }
 
+void displayPitfall(unsigned long timer) {
+  static unsigned long nextAction = 0;
+  static uint8_t frameOffset = 0;
+  if (nextAction > timer) {
+    return;
+  }
+  uint8_t displaySegments[2];
+  uint16_t word = pgm_read_word(&pitfallFrames[0] + frameOffset);
+  displaySegments[0] = (uint8_t)(word >> 8);
+  displaySegments[1] = (uint8_t)word;
+  sevsegshift.setSegments(displaySegments);
+  nextAction = timer + 150;
+  frameOffset = (frameOffset + 1) % (sizeof(pitfallFrames) / 2);
+}
+
 void setAdjacentRooms(struct point pt, struct room *adjacentRooms[]) {
   adjacentRooms[0] = &(cave[pt.x - 1][pt.y - 1]);
   adjacentRooms[1] = &(cave[pt.x - 1][pt.y    ]);
@@ -408,7 +423,7 @@ void setup() {
 
   setDefaultBrightness();
 
-  for (uint8_t i = 0; i < 4; i++) {
+  for (uint8_t i = 0; i < 5; i++) {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
 
@@ -438,7 +453,7 @@ void introState(unsigned long timer) {
     text[1] = pgm_read_byte(&introText[offset + 1]);
     sevsegshift.setSegments(text);
     offset++;
-    if (offset == sizeof(introText)) {
+    if (buttonState(arrow) || offset == sizeof(introText)) {
       currentStateFn = &startState;
     }
   }
@@ -478,6 +493,10 @@ void playState(unsigned long timer) {
     displayWumpusNearby(timer);
   }
 
+  if (buttonState(arrow)) {
+    currentStateFn = &arrowStartState;
+    return;
+  }
   if (buttonState(north)) {
     nextPlayerY--;
   }
@@ -524,8 +543,32 @@ void superbatState(unsigned long timer) {
   }
 }
 
-void pitfallState(unsigned long) {
-  sevsegshift.setChars("P");
+
+uint16_t dropSound;
+
+void pitfallState(unsigned long timer) {
+  dropSound = 0;
+  stopSong();
+  currentStateFn = &pitfallDropState;
+}
+
+void pitfallDropState(unsigned long timer) {
+  static unsigned long nextAction = 0;
+  displayPitfall(timer);
+  if (nextAction > timer) {
+    return;
+  }
+  nextAction = timer + 5;
+  if (dropSound < 900) {
+    playNote(dropSound);
+    dropSound += 3;
+  } else {
+    stopSong();
+    uint8_t segments[2] = {0xFF, 0xFF};
+    sevsegshift.setSegments(segments);
+    playSong(splat, splatDurations);
+    currentStateFn = &youLoseState;
+  }
 }
 
 void wumpusEatState(unsigned long timer) {
@@ -540,6 +583,9 @@ void wumpusEatState(unsigned long timer) {
     nextAction = 0;
     currentStateFn = &youLoseState;
   }
+}
+
+void arrowStartState(unsigned long timer) {
 }
 
 void youLoseState(unsigned long timer) {

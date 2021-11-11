@@ -28,3 +28,6 @@ const uint8_t snoreUpDurations[] PROGMEM = { 3, 10, 10, 0 };
 
 const uint16_t snoreDown[] PROGMEM = { 3000, 4000, REPEAT };
 const uint8_t snoreDownDurations[] PROGMEM = { 3, 10, 10, 0 };
+
+const uint16_t splat[] PROGMEM = { 4000 };
+const uint8_t splatDurations[] PROGMEM = { 1, 500 };

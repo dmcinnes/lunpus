@@ -14,7 +14,7 @@ void arrowFireState(unsigned long);
 void youLoseState(unsigned long);
 void youWinState(unsigned long);
 
-enum button{north, south, east, west};
+enum button{north, south, east, west, arrow};
 
 const uint8_t introText[] PROGMEM =
   {0x76, 0x1C, 0x54, 0x70, 0x00, 0x70, 0x74, 0x79, 0x00, 0x3C, 0x1E, 0x1C, 0x33, 0x27, 0x73, 0x1C, 0x6D};
@@ -26,6 +26,7 @@ const uint16_t windEastWestMask[] PROGMEM =
 
 const uint16_t wumpusBiteFrames[] PROGMEM = {0x0181, 0x23A3, 0x5454, 0x8808};
 const uint16_t batFlapFrames[] PROGMEM = {0x2323, 0x4040, 0x0C18, 0x4040};
+const uint16_t pitfallFrames[] PROGMEM = {0x4200, 0x0060, 0x0050, 0x4400};
 
 struct room {
   unsigned int wall : 1;
