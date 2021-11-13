@@ -453,9 +453,13 @@ void introState(unsigned long timer) {
     text[1] = pgm_read_byte(&introText[offset + 1]);
     sevsegshift.setSegments(text);
     offset++;
-    if (buttonState(arrow) || offset == sizeof(introText)) {
+    if (offset == sizeof(introText)) {
       currentStateFn = &startState;
     }
+  }
+  if (buttonState(arrow)) {
+    stopSong();
+    currentStateFn = &startState;
   }
 }
 
