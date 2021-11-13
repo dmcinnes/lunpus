@@ -213,27 +213,9 @@ void displayWumpusNearby(unsigned long timer) {
   sevsegshift.setBrightness(currentBrightness);
 }
 
-void displayBatFlap(unsigned long timer) {
-  static unsigned long nextAction = 0;
-  static uint8_t batFlapFrameOffset = 255;
-  if (nextAction < timer) {
-    if (batFlapFrameOffset >= sizeof(batFlapFrames) / 2) {
-      batFlapFrameOffset = 0;
-      playSong(batFlap, batFlapDurations);
-    }
-    uint8_t displaySegments[2];
-    uint16_t word = pgm_read_word(&batFlapFrames[0] + batFlapFrameOffset);
-    displaySegments[0] = (uint8_t)(word >> 8);
-    displaySegments[1] = (uint8_t)word;
-    sevsegshift.setSegments(displaySegments);
-    nextAction = timer + ((batFlapFrameOffset == 0) ? 150 : 100);
-    batFlapFrameOffset++;
-  }
-}
-
-void displayAnimation(unsigned long timer, uint16_t frameTime, uint16_t frames[], uint8_t frameCount) {
+bool displayAnimation(unsigned long timer, uint16_t frameTime, uint16_t frames[], uint8_t frameCount) {
   if (nextAnimationFrameTime > timer) {
-    return;
+    return false;
   }
   uint8_t displaySegments[2];
   uint16_t word = pgm_read_word(&frames[0] + animationFrameOffset);
@@ -242,6 +224,7 @@ void displayAnimation(unsigned long timer, uint16_t frameTime, uint16_t frames[]
   sevsegshift.setSegments(displaySegments);
   nextAnimationFrameTime = timer + frameTime;
   animationFrameOffset = (animationFrameOffset + 1) % frameCount;
+  return true;
 }
 
 void setAdjacentRooms(struct point pt, struct room *adjacentRooms[]) {
@@ -519,7 +502,10 @@ void superbatState(unsigned long timer) {
   if (nextAction == 0) {
     nextAction = timer + 3200;
   }
-  displayBatFlap(timer);
+  uint8_t animationTimeout = (animationFrameOffset == 0) ? 150 : 100;
+  if (displayAnimation(timer, animationTimeout, batFlapFrames, 6) && animationFrameOffset == 0) {
+    playSong(batFlap, batFlapDurations);
+  }
   if (timer > nextAction) {
     nextAction = 0;
     playSong(batSet, batSetDurations);
