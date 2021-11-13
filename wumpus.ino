@@ -38,6 +38,9 @@ uint8_t currentNote = 0;
 uint16_t *currentSong = &hotmk[0];
 uint8_t *currentSongDurations = &hotmkDurations[0];
 
+unsigned long nextAnimationFrameTime = 0;
+uint8_t animationFrameOffset = 0;
+
 SevSegShift sevsegshift(
                   SHIFT_PIN_DS,
                   SHIFT_PIN_SHCP,
@@ -229,18 +232,16 @@ void displayBatFlap(unsigned long timer) {
 }
 
 void displayAnimation(unsigned long timer, uint16_t frameTime, uint16_t frames[], uint8_t frameCount) {
-  static unsigned long nextAction = 0;
-  static uint8_t frameOffset = 0;
-  if (nextAction > timer) {
+  if (nextAnimationFrameTime > timer) {
     return;
   }
   uint8_t displaySegments[2];
-  uint16_t word = pgm_read_word(&frames[0] + frameOffset);
+  uint16_t word = pgm_read_word(&frames[0] + animationFrameOffset);
   displaySegments[0] = (uint8_t)(word >> 8);
   displaySegments[1] = (uint8_t)word;
   sevsegshift.setSegments(displaySegments);
-  nextAction = timer + frameTime;
-  frameOffset = (frameOffset + 1) % frameCount;
+  nextAnimationFrameTime = timer + frameTime;
+  animationFrameOffset = (animationFrameOffset + 1) % frameCount;
 }
 
 void setAdjacentRooms(struct point pt, struct room *adjacentRooms[]) {
@@ -498,6 +499,8 @@ void playState(unsigned long timer) {
 
   if (nextPlayerX != playerX || nextPlayerY != playerY) {
     currentRoom = cave[nextPlayerX][nextPlayerY];
+    nextAnimationFrameTime = 0;
+    animationFrameOffset = 0;
     stopSong();
     if (currentRoom.wall) {
       // wall beep
