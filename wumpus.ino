@@ -58,7 +58,6 @@ bool buttonState(button id) {
 }
 
 void updateCaveDisplay() {
-  sevsegshift.blank();
   uint8_t display[2] = {0, 0};
   if (cave[playerX][playerY - 1].wall) {
     display[0] |= northWall[0];
@@ -530,7 +529,6 @@ void superbatState(unsigned long timer) {
   }
 }
 
-
 uint16_t dropSound;
 
 void pitfallState(unsigned long timer) {
@@ -575,7 +573,7 @@ void wumpusEatState(unsigned long timer) {
 enum button selection;
 
 void arrowStartState(unsigned long timer) {
-  /* displayAnimation(timer, 500, arrowSelectFrames, 4); */
+  displayAnimation(timer, 500, arrowSelectFrames, 4);
   if (buttonState(arrow)) {
     // cancel
     currentStateFn = &playState;
