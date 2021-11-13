@@ -182,50 +182,33 @@ void playWind(uint8_t windOffset) {
 
 void displayWumpusNearby(unsigned long timer) {
   static unsigned long nextAction = 0;
-  if (nextAction < timer) {
-    static int16_t currentBrightness = 0;
-    static bool direction = true;
-    if (direction) {
-      if (currentBrightness == 0) {
-        playSong(snoreUp, snoreUpDurations);
-      }
-      currentBrightness += 1;
-      nextAction = timer + 10;
-      if (currentBrightness >= maxBrightness) {
-        direction = false;
-        nextAction += 2000;
-      }
-    } else {
-      if (currentBrightness >= maxBrightness) {
-        playSong(snoreDown, snoreDownDurations);
-      }
-      currentBrightness -= 1;
-      nextAction = timer + 10;
-      if (currentBrightness <= 0) {
-        direction = true;
-        nextAction += 2000;
-        stopSong();
-      }
-    }
-    sevsegshift.setBrightness(currentBrightness);
+  static int16_t currentBrightness = 0;
+  static bool direction = true;
+  if (nextAction > timer) {
+    return;
   }
-}
-
-void displayWumpusBite(unsigned long timer) {
-  static unsigned long nextAction = 0;
-  static uint8_t wumpusFrameOffset = 0;
-  if (nextAction < timer) {
-    if (wumpusFrameOffset >= sizeof(wumpusBiteFrames) / 2) {
-      wumpusFrameOffset = 0;
+  nextAction = timer + 10;
+  if (direction) {
+    if (currentBrightness == 0) {
+      playSong(snoreUp, snoreUpDurations);
     }
-    uint8_t displaySegments[2];
-    uint16_t word = pgm_read_word(&wumpusBiteFrames[0] + wumpusFrameOffset);
-    displaySegments[0] = (uint8_t)(word >> 8);
-    displaySegments[1] = (uint8_t)word;
-    sevsegshift.setSegments(displaySegments);
-    wumpusFrameOffset++;
-    nextAction = timer + 150;
+    currentBrightness += 1;
+    if (currentBrightness >= maxBrightness) {
+      direction = false;
+      nextAction += 2000;
+    }
+  } else {
+    if (currentBrightness >= maxBrightness) {
+      playSong(snoreDown, snoreDownDurations);
+    }
+    currentBrightness -= 1;
+    if (currentBrightness <= 0) {
+      direction = true;
+      nextAction += 2000;
+      stopSong();
+    }
   }
+  sevsegshift.setBrightness(currentBrightness);
 }
 
 void displayBatFlap(unsigned long timer) {
@@ -246,19 +229,19 @@ void displayBatFlap(unsigned long timer) {
   }
 }
 
-void displayPitfall(unsigned long timer) {
+void displayAnimation(unsigned long timer, uint16_t frameTime, uint16_t frames[], uint8_t frameCount) {
   static unsigned long nextAction = 0;
   static uint8_t frameOffset = 0;
   if (nextAction > timer) {
     return;
   }
   uint8_t displaySegments[2];
-  uint16_t word = pgm_read_word(&pitfallFrames[0] + frameOffset);
+  uint16_t word = pgm_read_word(&frames[0] + frameOffset);
   displaySegments[0] = (uint8_t)(word >> 8);
   displaySegments[1] = (uint8_t)word;
   sevsegshift.setSegments(displaySegments);
-  nextAction = timer + 150;
-  frameOffset = (frameOffset + 1) % (sizeof(pitfallFrames) / 2);
+  nextAction = timer + frameTime;
+  frameOffset = (frameOffset + 1) % frameCount;
 }
 
 void setAdjacentRooms(struct point pt, struct room *adjacentRooms[]) {
@@ -558,12 +541,12 @@ void pitfallState(unsigned long timer) {
 
 void pitfallDropState(unsigned long timer) {
   static unsigned long nextAction = 0;
-  displayPitfall(timer);
+  displayAnimation(timer, 150, pitfallFrames, 6);
   if (nextAction > timer) {
     return;
   }
   nextAction = timer + 5;
-  if (dropSound < 900) {
+  if (dropSound < 800) {
     playNote(dropSound);
     dropSound += 3;
   } else {
@@ -582,14 +565,36 @@ void wumpusEatState(unsigned long timer) {
     playSong(chopinBlock, chopinBlockDurations);
     setDefaultBrightness();
   }
-  displayWumpusBite(timer);
+  displayAnimation(timer, 150, wumpusBiteFrames, 4);
   if (timer > nextAction) {
     nextAction = 0;
     currentStateFn = &youLoseState;
   }
 }
 
+enum button selection;
+
 void arrowStartState(unsigned long timer) {
+  /* displayAnimation(timer, 500, arrowSelectFrames, 4); */
+  if (buttonState(arrow)) {
+    // cancel
+    currentStateFn = &playState;
+  /* } else if (buttonState(north)) { */
+  /*   selection = north; */
+  /*   currentStateFn = &arrowFireState; */
+  /* } else if (buttonState(south)) { */
+  /*   selection = south; */
+  /*   currentStateFn = &arrowFireState; */
+  /* } else if (buttonState(east)) { */
+  /*   selection = east; */
+  /*   currentStateFn = &arrowFireState; */
+  /* } else if (buttonState(west)) { */
+  /*   selection = west; */
+  /*   currentStateFn = &arrowFireState; */
+  }
+}
+
+void arrowFireState(unsigned long timer) {
 }
 
 void youLoseState(unsigned long timer) {
