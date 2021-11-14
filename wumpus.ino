@@ -86,49 +86,51 @@ enum batStates{batStartNorth, batEndNorth, batStartSouth, batEndSouth, batClear,
 
 void displayBatsNearby(unsigned long timer) {
   static unsigned long nextAction = 0;
-  if (nextAction < timer) {
-    static bool batPos;
-    static batStates batState = batStartNorth;
-    uint8_t segments[2];
-    sevsegshift.getSegments(segments);
-
-    switch(batState) {
-      case batStartNorth :
-        segments[0] |= 0x80;
-        batState = batEndNorth;
-        nextAction = timer + 50 + random(100);
-        break;
-      case batStartSouth :
-        segments[1] |= 0x80;
-        batState = batEndSouth;
-        nextAction = timer + 50 + random(100);
-        break;
-      case batEndNorth :
-        segments[0] ^= 0x80;
-        segments[1] |= 0x80;
-        batState = batClear;
-        nextAction = timer + 100 + random(100);
-        break;
-      case batEndSouth :
-        segments[0] |= 0x80;
-        segments[1] ^= 0x80;
-        batState = batClear;
-        nextAction = timer + 100 + random(100);
-        break;
-      case batClear :
-        segments[0] &= 0x7F;
-        segments[1] &= 0x7F;
-        nextAction = timer + 100;
-        batState = batReset;
-        break;
-      case batReset :
-        batState = (random(2)) ? batStartNorth : batStartSouth;
-        nextAction = timer + 500 + random(500);
-        updateCaveDisplay(); // reset cave view
-        return;
-    }
-    sevsegshift.setSegments(segments);
+  if (nextAction > timer) {
+    return;
   }
+
+  static bool batPos;
+  static batStates batState = batStartNorth;
+  uint8_t segments[2];
+  sevsegshift.getSegments(segments);
+
+  switch(batState) {
+    case batStartNorth :
+      segments[0] |= 0x80;
+      batState = batEndNorth;
+      nextAction = timer + 50 + random(100);
+      break;
+    case batStartSouth :
+      segments[1] |= 0x80;
+      batState = batEndSouth;
+      nextAction = timer + 50 + random(100);
+      break;
+    case batEndNorth :
+      segments[0] ^= 0x80;
+      segments[1] |= 0x80;
+      batState = batClear;
+      nextAction = timer + 100 + random(100);
+      break;
+    case batEndSouth :
+      segments[0] |= 0x80;
+      segments[1] ^= 0x80;
+      batState = batClear;
+      nextAction = timer + 100 + random(100);
+      break;
+    case batClear :
+      segments[0] &= 0x7F;
+      segments[1] &= 0x7F;
+      nextAction = timer + 100;
+      batState = batReset;
+      break;
+    case batReset :
+      batState = (random(2)) ? batStartNorth : batStartSouth;
+      nextAction = timer + 500 + random(500);
+      updateCaveDisplay(); // reset cave view
+      return;
+  }
+  sevsegshift.setSegments(segments);
 }
 
 void displayPitNearby(unsigned long timer) {
@@ -488,6 +490,7 @@ void playState(unsigned long timer) {
     if (currentRoom.wall) {
       // wall beep
       playSong(bonk, bonkDurations);
+      return;
     } else {
       playerX = nextPlayerX;
       playerY = nextPlayerY;
@@ -498,24 +501,23 @@ void playState(unsigned long timer) {
 }
 
 void superbatState(unsigned long timer) {
-  static unsigned long nextAction = 0;
-  if (nextAction == 0) {
-    nextAction = timer + 3200;
-  }
+  static uint8_t counter = 0;
   uint8_t animationTimeout = (animationFrameOffset == 0) ? 150 : 100;
-  if (displayAnimation(timer, animationTimeout, batFlapFrames, 6) && animationFrameOffset == 0) {
+  if (displayAnimation(timer, animationTimeout, batFlapFrames, 4) && animationFrameOffset == 0) {
     playSong(batFlap, batFlapDurations);
+    counter++;
   }
-  if (timer > nextAction) {
-    nextAction = 0;
-    playSong(batSet, batSetDurations);
-    do {
-      playerX = random(mapWidth);
-      playerY = random(mapHeight);
-    } while (cave[playerX][playerY].wall);
-    updateCaveDisplay();
-    currentStateFn = &playState;
+  if (counter < 6) {
+    return;
   }
+  counter = 0;
+  playSong(batSet, batSetDurations);
+  do {
+    playerX = random(mapWidth);
+    playerY = random(mapHeight);
+  } while (cave[playerX][playerY].wall);
+  updateCaveDisplay();
+  currentStateFn = &playState;
 }
 
 uint16_t dropSound;
