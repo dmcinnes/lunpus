@@ -254,6 +254,12 @@ void setupMap() {
   struct point pt;
 
   for (i = 0; i < mapWidth; i++) {
+    for (j = 0; j < mapHeight; j++) {
+      cave[i][i] = (const struct room){ 0 };
+    }
+  }
+
+  for (i = 0; i < mapWidth; i++) {
     cave[i][0].wall = 1;
     cave[i][mapHeight - 1].wall = 1;
   }
