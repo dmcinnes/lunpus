@@ -445,7 +445,7 @@ void playState(unsigned long timer) {
   struct room currentRoom = cave[playerX][playerY];
 
   if (currentRoom.wumpus) {
-    currentStateFn = &wumpusEatState;
+    currentStateFn = &disturbWumpusState;
     return;
   } else if (currentRoom.superbat) {
     currentStateFn = &superbatState;
@@ -547,16 +547,17 @@ void pitfallDropState(unsigned long timer) {
   }
 }
 
+void disturbWumpusState(unsigned long timer) {
+  playSong(chopinBlock, chopinBlockDurations);
+  setDefaultBrightness();
+  currentStateFn = &wumpusEatState;
+}
+
 void wumpusEatState(unsigned long timer) {
-  static unsigned long nextAction = 0;
-  if (nextAction == 0) {
-    nextAction = timer + 600;
-    playSong(chopinBlock, chopinBlockDurations);
-    setDefaultBrightness();
+  if (animationFrameOffset < 7) {
+    displayAnimation(timer, 180, wumpusBiteFrames, 8);
   }
-  displayAnimation(timer, 150, wumpusBiteFrames, 4);
-  if (timer > nextAction) {
-    nextAction = 0;
+  if (nextNoteTime == 0) {
     currentStateFn = &youLoseState;
   }
 }
@@ -587,4 +588,7 @@ void arrowFireState(unsigned long timer) {
 }
 
 void youLoseState(unsigned long timer) {
+  if (buttonState(arrow)) {
+    currentStateFn = &startState;
+  }
 }
