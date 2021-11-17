@@ -31,3 +31,6 @@ const uint8_t snoreDownDurations[] PROGMEM = { 3, 10, 10, 0 };
 
 const uint16_t splat[] PROGMEM = { 4000 };
 const uint8_t splatDurations[] PROGMEM = { 1, 500 };
+
+const uint16_t wumpusMove[] PROGMEM = { 5000, REST, 5000, REST, 5000 };
+const uint8_t wumpusMoveDurations[] PROGMEM = { 5, 500, 200, 500, 200, 500 };

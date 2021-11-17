@@ -10,6 +10,7 @@ void superbatState(unsigned long);
 void pitfallState(unsigned long);
 void pitfallDropState(unsigned long);
 void disturbWumpusState(unsigned long);
+void wumpusMoveState(unsigned long);
 void wumpusEatState(unsigned long);
 void arrowStartState(unsigned long);
 void arrowFireState(unsigned long);

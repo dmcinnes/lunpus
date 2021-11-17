@@ -32,6 +32,7 @@ const uint8_t maxBrightness = 90;
 struct room cave[mapWidth][mapHeight];
 
 uint8_t playerX, playerY;
+uint8_t wumpusX, wumpusY;
 
 unsigned long nextNoteTime = 0;
 uint8_t currentNote = 0;
@@ -301,6 +302,8 @@ void setupMap() {
 
   pt = randomRoom();
   cave[pt.x][pt.y].wumpus = 1;
+  wumpusX = pt.x;
+  wumpusY = pt.y;
   setAdjacentRooms(pt, adjacentRooms);
   for (j = 0; j < 8; j++) {
     (*adjacentRooms[j]).wumpusNearby = 1;
@@ -554,9 +557,43 @@ void pitfallDropState(unsigned long timer) {
 }
 
 void disturbWumpusState(unsigned long timer) {
-  playSong(chopinBlock, chopinBlockDurations);
-  setDefaultBrightness();
-  currentStateFn = &wumpusEatState;
+  if (random(4) == 0) {
+    setDefaultBrightness();
+    playSong(chopinBlock, chopinBlockDurations);
+    currentStateFn = &wumpusEatState;
+  } else {
+    playSong(wumpusMove, wumpusMoveDurations);
+    currentStateFn = &wumpusMoveState;
+  }
+}
+
+// move the wumpus and his smells to another location
+void wumpusMoveState(unsigned long timer) {
+  uint8_t i, j;
+  struct point oldWumpusPt, newWumpusPt;
+  struct room *adjacentRooms[8];
+
+  do {
+    newWumpusPt.x = wumpusX + random(2) - 1;
+    newWumpusPt.y = wumpusY + random(2) - 1;
+  } while(cave[newWumpusPt.x][newWumpusPt.y].wall);
+
+  cave[wumpusX][wumpusY].wumpus = 0;
+  for (i = 0; i < mapWidth; i++) {
+    for (j = 0; j < mapHeight; j++) {
+      cave[i][j].wumpusNearby = 0;
+    }
+  }
+
+  setAdjacentRooms(newWumpusPt, adjacentRooms);
+  for (i = 0; i < 8; i++) {
+    (*adjacentRooms[i]).wumpusNearby = 1;
+  }
+  wumpusX = newWumpusPt.x;
+  wumpusY = newWumpusPt.y;
+  cave[wumpusX][wumpusY].wumpus = 1;
+
+  currentStateFn = &playState;
 }
 
 void wumpusEatState(unsigned long timer) {
