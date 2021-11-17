@@ -10,6 +10,7 @@ void superbatState(unsigned long);
 void pitfallState(unsigned long);
 void pitfallDropState(unsigned long);
 void disturbWumpusState(unsigned long);
+void wumpusBumpState(unsigned long);
 void wumpusMoveState(unsigned long);
 void wumpusEatState(unsigned long);
 void arrowStartState(unsigned long);
@@ -28,6 +29,7 @@ const uint16_t windEastWestMask[] PROGMEM =
   {0x4FFF, 0x36FF, 0xF9FF, 0x7F7F, 0xFF4F, 0xFF36, 0xFFF9};
 
 const uint16_t wumpusBiteFrames[] PROGMEM = {0x3006, 0x794F, 0x0181, 0x23A3, 0x5454, 0x8808, 0x6773};
+const uint16_t wumpusBumpFrames[] PROGMEM = {0x0630, 0x4670, 0x2805, 0x2004};
 const uint16_t batFlapFrames[] PROGMEM = {0x2323, 0x4040, 0x0C18, 0x4040};
 const uint16_t pitfallFrames[] PROGMEM = {0x0000, 0x4250, 0x390F, 0x0000, 0x4460, 0x390F};
 const uint16_t arrowSelectFrames[] PROGMEM = {0x4600, 0x4260, 0x0070, 0x4450};

@@ -563,6 +563,15 @@ void disturbWumpusState(unsigned long timer) {
     currentStateFn = &wumpusEatState;
   } else {
     playSong(wumpusMove, wumpusMoveDurations);
+    currentStateFn = &wumpusBumpState;
+  }
+}
+
+void wumpusBumpState(unsigned long timer) {
+  if (animationFrameOffset < 4) {
+    displayAnimation(timer, 100, wumpusBumpFrames, 5);
+  } else {
+    updateCaveDisplay(); // reset cave view
     currentStateFn = &wumpusMoveState;
   }
 }
