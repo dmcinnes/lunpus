@@ -621,18 +621,13 @@ void arrowStartState(unsigned long timer) {
   if (buttonState(arrow)) {
     // cancel
     currentStateFn = &playState;
-  /* } else if (buttonState(north)) { */
-  /*   selection = north; */
-  /*   currentStateFn = &arrowFireState; */
-  /* } else if (buttonState(south)) { */
-  /*   selection = south; */
-  /*   currentStateFn = &arrowFireState; */
-  /* } else if (buttonState(east)) { */
-  /*   selection = east; */
-  /*   currentStateFn = &arrowFireState; */
-  /* } else if (buttonState(west)) { */
-  /*   selection = west; */
-  /*   currentStateFn = &arrowFireState; */
+    return;
+  }
+  for (uint8_t i = 0; i < 4; i++) {
+    if (buttonState(i)) {
+      selection = i;
+      /* currentStateFn = &arrowFireState; */
+    }
   }
 }
 
