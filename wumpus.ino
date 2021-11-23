@@ -83,55 +83,35 @@ void updateCaveDisplay() {
   sevsegshift.setSegments(display);
 }
 
-enum batStates{batStartNorth, batEndNorth, batStartSouth, batEndSouth, batClear, batReset};
-
 void displayBatsNearby(unsigned long timer) {
   static unsigned long nextAction = 0;
   if (nextAction > timer) {
     return;
   }
+  static uint8_t batFrameOffset = 0;
+  static bool batDirection = true;
 
-  static bool batPos;
-  static batStates batState = batStartNorth;
+  updateCaveDisplay();
   uint8_t segments[2];
   sevsegshift.getSegments(segments);
-
-  switch(batState) {
-    case batStartNorth :
-      segments[0] |= 0x80;
-      batState = batEndNorth;
-      nextAction = timer + 50 + random(100);
-      break;
-    case batStartSouth :
-      segments[1] |= 0x80;
-      batState = batEndSouth;
-      nextAction = timer + 50 + random(100);
-      break;
-    case batEndNorth :
-      segments[0] ^= 0x80;
-      segments[1] |= 0x80;
-      batState = batClear;
-      nextAction = timer + 100 + random(100);
-      break;
-    case batEndSouth :
-      segments[0] |= 0x80;
-      segments[1] ^= 0x80;
-      batState = batClear;
-      nextAction = timer + 100 + random(100);
-      break;
-    case batClear :
-      segments[0] &= 0x7F;
-      segments[1] &= 0x7F;
-      nextAction = timer + 100;
-      batState = batReset;
-      break;
-    case batReset :
-      batState = (random(2)) ? batStartNorth : batStartSouth;
-      nextAction = timer + 500 + random(500);
-      updateCaveDisplay(); // reset cave view
-      return;
+  // wipe out wall dots
+  segments[0] &= 0x7F;
+  segments[1] &= 0x7F;
+  uint8_t frame = pgm_read_byte(batNearbyFrames + batFrameOffset);
+  if (batFrameOffset == 0) {
+    segments[batDirection] |= frame;
+  } else {
+    segments[!batDirection] |= frame;
   }
   sevsegshift.setSegments(segments);
+  nextAction = timer + 50 + random(100);
+  batFrameOffset++;
+  if (batFrameOffset == 4) {
+    updateCaveDisplay();
+    batDirection = random(2);
+    nextAction = timer + 500 + random(500);
+    batFrameOffset = 0;
+  }
 }
 
 void displayPitNearby(unsigned long timer) {
