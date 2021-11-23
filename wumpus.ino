@@ -114,22 +114,23 @@ void displayBatsNearby(unsigned long timer) {
   }
 }
 
+const uint8_t totalMaskSegments = 7;
+
 void displayPitNearby(unsigned long timer) {
   uint16_t *maskSegments;
-  uint8_t totalMaskSegments, goingUp;
+  uint8_t goingUp;
   if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) <
       (cave[playerX + 1][playerY].wall + cave[playerX - 1][playerY].wall)) {
     maskSegments = &windNorthSouthMask[0];
-    totalMaskSegments = sizeof(windNorthSouthMask) / 2;
     goingUp = playerX % 2;
   } else {
     maskSegments = &windEastWestMask[0];
-    totalMaskSegments = sizeof(windEastWestMask) / 2;
     goingUp = playerY % 2;
   }
 
   static unsigned long nextAction = 0;
   static uint8_t windOffset = 0;
+
   playWind(windOffset);
   if (nextAction > timer) {
     return;
