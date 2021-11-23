@@ -236,7 +236,7 @@ void setupMap() {
 
   for (i = 0; i < mapWidth; i++) {
     for (j = 0; j < mapHeight; j++) {
-      cave[i][i] = (const struct room){ 0 };
+      cave[i][j] = {0};
     }
   }
 
