@@ -607,16 +607,51 @@ void arrowStartState(unsigned long timer) {
   for (uint8_t i = 0; i < 4; i++) {
     if (buttonState(i)) {
       selection = i;
-      /* currentStateFn = &arrowFireState; */
+      currentStateFn = &arrowFireState;
     }
   }
 }
 
 void arrowFireState(unsigned long timer) {
+  uint8_t x, y;
+  x = playerX;
+  y = playerY;
+  struct room currentRoom;
+  do {
+    switch(selection) {
+      case north:
+        y--;
+        break;
+      case south:
+        y++;
+        break;
+      case east:
+        x++;
+        break;
+      case west:
+        x--;
+        break;
+    }
+    currentRoom = cave[x][y];
+  } while(!currentRoom.wall && !currentRoom.wumpus);
+
+  updateCaveDisplay(); // reset cave view
+  if (currentRoom.wumpus) {
+    currentStateFn = &youWinState;
+  }
+  if (currentRoom.wumpusNearby) {
+    currentStateFn = &wumpusMoveState;
+  }
+  // hit a wall
+  playSong(bonk, bonkDurations);
+  currentStateFn = &playState;
 }
 
 void youLoseState(unsigned long timer) {
   if (buttonState(arrow)) {
     currentStateFn = &startState;
   }
+}
+
+void youWinState(unsigned long timer) {
 }

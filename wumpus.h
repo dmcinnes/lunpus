@@ -40,6 +40,8 @@ const uint16_t batFlapFrames[] PROGMEM = {0x2323, 0x4040, 0x0C18, 0x4040};
 const uint16_t pitfallFrames[] PROGMEM = {0x0000, 0x4250, 0x390F, 0x0000, 0x4460, 0x390F};
 const uint16_t arrowSelectFrames[] PROGMEM = {0x4600, 0x4260, 0x0070, 0x4450};
 const uint8_t batNearbyFrames[] PROGMEM = {0x80, 0x80, 0x00, 0x00};
+const uint8_t arrowUpFrames[] PROGMEM = {0x10, 0x20};
+const uint8_t arrowRightFrames[] PROGMEM = {0x40, 0x40};
 
 struct room {
   unsigned int wall : 1;
