@@ -598,7 +598,7 @@ void wumpusEatState(unsigned long timer) {
 enum button selection;
 
 void arrowStartState(unsigned long timer) {
-  displayAnimation(timer, 500, arrowSelectFrames, 4);
+  displayAnimation(timer, 200, arrowSelectFrames, 2);
   if (buttonState(arrow)) {
     // cancel
     currentStateFn = &playState;
@@ -638,13 +638,13 @@ void arrowFireState(unsigned long timer) {
   updateCaveDisplay(); // reset cave view
   if (currentRoom.wumpus) {
     currentStateFn = &youWinState;
-  }
-  if (currentRoom.wumpusNearby) {
+  } else if (currentRoom.wumpusNearby) {
     currentStateFn = &wumpusMoveState;
+  } else {
+    currentStateFn = &playState;
   }
   // hit a wall
   playSong(bonk, bonkDurations);
-  currentStateFn = &playState;
 }
 
 void youLoseState(unsigned long timer) {
