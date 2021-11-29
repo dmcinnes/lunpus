@@ -564,8 +564,8 @@ void wumpusMoveState(unsigned long timer) {
   struct room *adjacentRooms[8];
 
   do {
-    newWumpusPt.x = wumpusX + random(2) - 1;
-    newWumpusPt.y = wumpusY + random(2) - 1;
+    newWumpusPt.x = wumpusX + random(3) - 1;
+    newWumpusPt.y = wumpusY + random(3) - 1;
   } while(cave[newWumpusPt.x][newWumpusPt.y].wall);
 
   cave[wumpusX][wumpusY].wumpus = 0;
