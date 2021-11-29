@@ -36,8 +36,8 @@ uint8_t wumpusX, wumpusY;
 
 unsigned long nextNoteTime = 0;
 uint8_t currentNote = 0;
-uint16_t *currentSong = &hotmk[0];
-uint8_t *currentSongDurations = &hotmkDurations[0];
+const uint16_t *currentSong = &hotmk[0];
+const uint8_t *currentSongDurations = &hotmkDurations[0];
 
 unsigned long nextAnimationFrameTime = 0;
 uint8_t animationFrameOffset = 0;
@@ -117,7 +117,7 @@ void displayBatsNearby(unsigned long timer) {
 const uint8_t totalMaskSegments = 7;
 
 void displayPitNearby(unsigned long timer) {
-  uint16_t *maskSegments;
+  const uint16_t *maskSegments;
   uint8_t goingUp;
   if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) <
       (cave[playerX + 1][playerY].wall + cave[playerX - 1][playerY].wall)) {

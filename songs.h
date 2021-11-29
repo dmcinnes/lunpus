@@ -21,7 +21,7 @@ const uint16_t batFlap[] PROGMEM = { B3, C4, G3 };
 const uint8_t batFlapDurations[] PROGMEM = { 3, 50, 50, 50 };
 
 const uint16_t batSet[] PROGMEM = { E3, A2 };
-const uint8_t batSetDurations[] PROGMEM = { 2, 300, 100 };
+const uint8_t batSetDurations[] PROGMEM = { 2, 255, 100 };
 
 const uint16_t snoreUp[] PROGMEM = { 1500, 3000, REPEAT };
 const uint8_t snoreUpDurations[] PROGMEM = { 3, 10, 10, 0 };
@@ -30,7 +30,8 @@ const uint16_t snoreDown[] PROGMEM = { 3000, 4000, REPEAT };
 const uint8_t snoreDownDurations[] PROGMEM = { 3, 10, 10, 0 };
 
 const uint16_t splat[] PROGMEM = { 4000 };
-const uint8_t splatDurations[] PROGMEM = { 1, 500 };
+const uint8_t splatDurations[] PROGMEM = { 1, 255 };
 
 const uint16_t wumpusMove[] PROGMEM = { 5000, REST, 5000, REST, 5000 };
-const uint8_t wumpusMoveDurations[] PROGMEM = { 5, 500, 200, 500, 200, 500 };
+const uint8_t wumpusMoveDurations[] PROGMEM = { 5, 255, 200, 255, 200, 255 };
+

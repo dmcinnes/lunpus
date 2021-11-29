@@ -3,6 +3,12 @@
 #include "scale16.h"
 #include "songs.h"
 
+void playNote(uint16_t);
+void playSong(uint16_t);
+void playWind(uint8_t);
+void playSong(uint16_t[], uint8_t[]);
+void stopSong();
+
 void introState(unsigned long);
 void startState(unsigned long);
 void playState(unsigned long);
