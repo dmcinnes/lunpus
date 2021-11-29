@@ -197,17 +197,17 @@ void displayWumpusNearby(unsigned long timer) {
   sevsegshift.setBrightness(currentBrightness);
 }
 
-bool displayAnimation(unsigned long timer, uint16_t frameTime, uint16_t frames[], uint8_t frameCount) {
+bool displayAnimation(unsigned long timer, uint16_t frameTime, const uint8_t frames[]) {
   if (nextAnimationFrameTime > timer) {
     return false;
   }
   uint8_t displaySegments[2];
-  uint16_t word = pgm_read_word(&frames[0] + animationFrameOffset);
-  displaySegments[0] = (uint8_t)(word >> 8);
-  displaySegments[1] = (uint8_t)word;
+  uint8_t frameCount = pgm_read_byte(&frames[0]);
+  displaySegments[0] = pgm_read_byte(&frames[animationFrameOffset + 1]);
+  displaySegments[1] = pgm_read_byte(&frames[animationFrameOffset + 2]);
   sevsegshift.setSegments(displaySegments);
   nextAnimationFrameTime = timer + frameTime;
-  animationFrameOffset = (animationFrameOffset + 1) % frameCount;
+  animationFrameOffset = (animationFrameOffset + 2) % frameCount;
   return true;
 }
 
@@ -493,7 +493,7 @@ void playState(unsigned long timer) {
 void superbatState(unsigned long timer) {
   static uint8_t counter = 0;
   uint8_t animationTimeout = (animationFrameOffset == 0) ? 150 : 100;
-  if (displayAnimation(timer, animationTimeout, batFlapFrames, 4) && animationFrameOffset == 0) {
+  if (displayAnimation(timer, animationTimeout, batFlapFrames) && animationFrameOffset == 0) {
     playSong(batFlap, batFlapDurations);
     counter++;
   }
@@ -520,7 +520,7 @@ void pitfallState(unsigned long timer) {
 
 void pitfallDropState(unsigned long timer) {
   static unsigned long nextAction = 0;
-  displayAnimation(timer, 150, pitfallFrames, 6);
+  displayAnimation(timer, 150, pitfallFrames);
   if (nextAction > timer) {
     return;
   }
@@ -550,7 +550,7 @@ void disturbWumpusState(unsigned long timer) {
 
 void wumpusBumpState(unsigned long timer) {
   if (animationFrameOffset < 4) {
-    displayAnimation(timer, 100, wumpusBumpFrames, 5);
+    displayAnimation(timer, 100, wumpusBumpFrames);
   } else {
     updateCaveDisplay(); // reset cave view
     currentStateFn = &wumpusMoveState;
@@ -588,7 +588,7 @@ void wumpusMoveState(unsigned long timer) {
 
 void wumpusEatState(unsigned long timer) {
   if (animationFrameOffset < 7) {
-    displayAnimation(timer, 180, wumpusBiteFrames, 8);
+    displayAnimation(timer, 180, wumpusBiteFrames);
   }
   if (nextNoteTime == 0) {
     currentStateFn = &youLoseState;
@@ -598,7 +598,7 @@ void wumpusEatState(unsigned long timer) {
 enum button selection;
 
 void arrowStartState(unsigned long timer) {
-  displayAnimation(timer, 200, arrowSelectFrames, 2);
+  displayAnimation(timer, 200, arrowSelectFrames);
   if (buttonState(arrow)) {
     // cancel
     currentStateFn = &playState;
