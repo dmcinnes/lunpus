@@ -362,6 +362,25 @@ void stopSong() {
   playNote(REST);
 }
 
+bool renderText(unsigned long timer, uint8_t text[]) {
+  static unsigned long nextAction = 0;
+  static uint8_t offset = 1;
+  if (nextAction > timer) {
+    return false;
+  }
+  nextAction = timer + 400;
+  uint8_t segments[2];
+  segments[0] = pgm_read_byte(&introText[offset + 1]);
+  segments[1] = pgm_read_byte(&introText[offset + 2]);
+  sevsegshift.setSegments(segments);
+  offset++;
+  if (offset == pgm_read_byte(&introText[0])) {
+    offset = 1;
+    return true;
+  }
+  return false;
+}
+
 void setup() {
   randomSeed(analogRead(1));
 
@@ -402,19 +421,10 @@ void loop() {
 /* #### Game States #### */
 
 void introState(unsigned long timer) {
-  static unsigned long nextAction = 0;
-  static uint8_t offset = 0;
-  if (nextAction < timer) {
-    nextAction = timer + 400;
-    uint8_t text[2];
-    text[0] = pgm_read_byte(&introText[offset]);
-    text[1] = pgm_read_byte(&introText[offset + 1]);
-    sevsegshift.setSegments(text);
-    offset++;
-    if (offset == sizeof(introText)) {
-      currentStateFn = &startState;
-    }
+  if (renderText(timer, introText)) {
+    currentStateFn = &startState;
   }
+
   if (buttonState(arrow)) {
     stopSong();
     currentStateFn = &startState;
