@@ -14,7 +14,6 @@ void startState(unsigned long);
 void playState(unsigned long);
 void superbatState(unsigned long);
 void pitfallState(unsigned long);
-void pitfallDropState(unsigned long);
 void disturbWumpusState(unsigned long);
 void wumpusBumpState(unsigned long);
 void wumpusMoveState(unsigned long);

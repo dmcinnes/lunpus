@@ -510,15 +510,9 @@ void superbatState(unsigned long timer) {
   currentStateFn = &playState;
 }
 
-uint16_t dropSound;
+uint16_t dropSound = 0;
 
 void pitfallState(unsigned long timer) {
-  dropSound = 0;
-  stopSong();
-  currentStateFn = &pitfallDropState;
-}
-
-void pitfallDropState(unsigned long timer) {
   static unsigned long nextAction = 0;
   displayAnimation(timer, 150, pitfallFrames);
   if (nextAction > timer) {
@@ -529,6 +523,7 @@ void pitfallDropState(unsigned long timer) {
     playNote(dropSound);
     dropSound += 3;
   } else {
+    dropSound = 0;
     stopSong();
     uint8_t segments[2] = {0xFF, 0xFF};
     sevsegshift.setSegments(segments);
