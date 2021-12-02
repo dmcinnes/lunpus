@@ -7,6 +7,18 @@ const uint16_t hotmk[] PROGMEM =
 const uint8_t hotmkDurations[] PROGMEM =
   { 30, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 250, 250 };
 
+const uint16_t fanfare[] PROGMEM =
+  { D2, G2, B2, REST, D2, G2, B2, REST, D2, G2, B2, B2 };
+
+const uint8_t fanfareDurations[] PROGMEM =
+  { 12, 200, 200, 200, 50, 200, 200, 200, 50, 200, 200, 255, 255 };
+
+const uint16_t youWin[] PROGMEM =
+  { E3, C3, D3, E3, C3, G3, G3 };
+
+const uint8_t youWinDurations[] PROGMEM =
+  { 7, 200, 200, 200, 200, 250, 255, 255 };
+
 // Funeral March by Chopin
 const uint16_t chopinBlock[] PROGMEM =
   { A0, A0, REST, A0, A0, REST, A0, REST, A0, A0, C1, C1, B0, REST, B0, B0, A0, REST, A0, A0, REST, A0, REST, A0, A0, A0 };
