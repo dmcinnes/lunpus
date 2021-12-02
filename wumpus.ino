@@ -554,7 +554,7 @@ void disturbWumpusState(unsigned long timer) {
 }
 
 void wumpusBumpState(unsigned long timer) {
-  if (animationFrameOffset < 4) {
+  if (animationFrameOffset < 8) {
     displayAnimation(timer, 100, wumpusBumpFrames);
   } else {
     updateCaveDisplay(); // reset cave view
