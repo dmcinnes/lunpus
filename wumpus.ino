@@ -592,7 +592,7 @@ void wumpusMoveState(unsigned long timer) {
 }
 
 void wumpusEatState(unsigned long timer) {
-  if (animationFrameOffset < 7) {
+  if (animationFrameOffset < 14) {
     displayAnimation(timer, 180, wumpusBiteFrames);
   }
   if (nextNoteTime == 0) {
