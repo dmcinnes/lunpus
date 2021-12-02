@@ -335,16 +335,16 @@ void updateAudio(unsigned long timer) {
   if (timer < nextNoteTime) {
     return;
   }
-  if (currentNote == pgm_read_byte(currentSongDurations)) {
+  if (currentNote == eeprom_read_byte(currentSongDurations)) {
     stopSong();
     return;
   }
-  uint16_t note = pgm_read_word(currentSong + currentNote);
+  uint16_t note = eeprom_read_word(currentSong + currentNote);
   if (note == REPEAT) {
     currentNote = 0;
     return;
   }
-  uint8_t duration = pgm_read_byte(currentSongDurations + currentNote + 1);
+  uint8_t duration = eeprom_read_byte(currentSongDurations + currentNote + 1);
   playNote(note);
   nextNoteTime = duration + timer;
   currentNote++;

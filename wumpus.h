@@ -1,3 +1,4 @@
+#include <avr/eeprom.h>
 #include <avr/pgmspace.h>
 #include "SevSegShift.h"
 #include "scale16.h"
