@@ -27,12 +27,15 @@ const uint8_t maxPits = 6;
 const uint8_t minBats = 2;
 const uint8_t maxBats = 6;
 
+const uint8_t maxArrows = 6;
+
 const uint8_t maxBrightness = 90;
 
 struct room cave[mapWidth][mapHeight];
 
 uint8_t playerX, playerY;
 uint8_t wumpusX, wumpusY;
+uint8_t arrows;
 
 unsigned long nextNoteTime = 0;
 uint8_t currentNote = 0;
@@ -97,7 +100,7 @@ void displayBatsNearby(unsigned long timer) {
   // wipe out wall dots
   segments[0] &= 0x7F;
   segments[1] &= 0x7F;
-  uint8_t frame = pgm_read_byte(batNearbyFrames + batFrameOffset);
+  uint8_t frame = eeprom_read_byte(batNearbyFrames + batFrameOffset);
   if (batFrameOffset == 0) {
     segments[batDirection] |= frame;
   } else {
@@ -148,7 +151,7 @@ void displayPitNearby(unsigned long timer) {
   }
   uint8_t displaySegments[2];
   sevsegshift.getSegments(displaySegments);
-  uint16_t word = pgm_read_word(maskSegments + windOffset);
+  uint16_t word = eeprom_read_word(maskSegments + windOffset);
   displaySegments[0] &= (uint8_t)word;
   displaySegments[1] &= (uint8_t)(word >> 8);
   sevsegshift.setSegments(displaySegments);
@@ -202,9 +205,9 @@ bool displayAnimation(unsigned long timer, uint16_t frameTime, const uint8_t fra
     return false;
   }
   uint8_t displaySegments[2];
-  uint8_t frameCount = pgm_read_byte(&frames[0]);
-  displaySegments[0] = pgm_read_byte(&frames[animationFrameOffset + 1]);
-  displaySegments[1] = pgm_read_byte(&frames[animationFrameOffset + 2]);
+  uint8_t frameCount = eeprom_read_byte(&frames[0]);
+  displaySegments[0] = eeprom_read_byte(&frames[animationFrameOffset + 1]);
+  displaySegments[1] = eeprom_read_byte(&frames[animationFrameOffset + 2]);
   sevsegshift.setSegments(displaySegments);
   nextAnimationFrameTime = timer + frameTime;
   animationFrameOffset = (animationFrameOffset + 2) % frameCount;
@@ -300,6 +303,7 @@ void setupPlayer() {
   } while (candidate.wumpus || candidate.superbat || candidate.pit);
   playerX = pt.x;
   playerY = pt.y;
+  arrows = maxArrows;
 }
 
 void setDefaultBrightness() {
@@ -370,11 +374,11 @@ bool renderText(unsigned long timer, uint8_t text[]) {
   }
   nextAction = timer + 400;
   uint8_t segments[2];
-  segments[0] = pgm_read_byte(&introText[offset + 1]);
-  segments[1] = pgm_read_byte(&introText[offset + 2]);
+  segments[0] = eeprom_read_byte(&text[offset + 1]);
+  segments[1] = eeprom_read_byte(&text[offset + 2]);
   sevsegshift.setSegments(segments);
   offset++;
-  if (offset == pgm_read_byte(&introText[0])) {
+  if (offset == eeprom_read_byte(&text[0])) {
     offset = 1;
     return true;
   }
@@ -444,6 +448,11 @@ void playState(unsigned long timer) {
   uint8_t nextPlayerY = playerY;
 
   struct room currentRoom = cave[playerX][playerY];
+
+  if (arrows == 0) {
+    currentStateFn = &wumpusEatState;
+    return;
+  }
 
   if (currentRoom.wumpus) {
     currentStateFn = &disturbWumpusState;
@@ -545,8 +554,6 @@ void pitfallState(unsigned long timer) {
 
 void disturbWumpusState(unsigned long timer) {
   if (random(4) == 0) {
-    setDefaultBrightness();
-    playSong(chopinBlock, chopinBlockDurations);
     currentStateFn = &wumpusEatState;
   } else {
     playSong(wumpusMove, wumpusMoveDurations);
@@ -593,6 +600,13 @@ void wumpusMoveState(unsigned long timer) {
 }
 
 void wumpusEatState(unsigned long timer) {
+  animationFrameOffset = 0;
+  setDefaultBrightness();
+  playSong(chopinBlock, chopinBlockDurations);
+  currentStateFn = &wumpusEatAnimationState;
+}
+
+void wumpusEatAnimationState(unsigned long timer) {
   if (animationFrameOffset < 14) {
     displayAnimation(timer, 180, wumpusBiteFrames);
   }
@@ -604,18 +618,29 @@ void wumpusEatState(unsigned long timer) {
 enum button selection;
 
 void arrowStartState(unsigned long timer) {
-  displayAnimation(timer, 200, arrowSelectFrames);
   if (buttonState(arrow)) {
     // cancel
     currentStateFn = &playState;
+    updateCaveDisplay();
     return;
   }
   for (uint8_t i = 0; i < 4; i++) {
     if (buttonState(i)) {
       selection = i;
+      arrows--;
       currentStateFn = &arrowFireState;
     }
   }
+
+  if (nextAnimationFrameTime > timer) {
+    return;
+  }
+  animationFrameOffset = (animationFrameOffset + 1) % 6;
+  uint8_t displaySegments[2];
+  displaySegments[0] = eeprom_read_byte(&arrowSelectDigits[arrows]);
+  displaySegments[1] = eeprom_read_byte(&arrowSelectFrames[animationFrameOffset]);
+  sevsegshift.setSegments(displaySegments);
+  nextAnimationFrameTime = timer + 200;
 }
 
 void arrowFireState(unsigned long timer) {
