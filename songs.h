@@ -47,3 +47,5 @@ uint8_t splatDurations[] EEMEM = { 1, 255 };
 uint16_t wumpusMove[] EEMEM = { 5000, REST, 5000, REST, 5000 };
 uint8_t wumpusMoveDurations[] EEMEM = { 5, 255, 200, 255, 200, 255 };
 
+uint16_t ricochet[] EEMEM = { A0, B2 };
+uint8_t ricochetDurations[] EEMEM = { 2, 100, 150 };

@@ -432,6 +432,7 @@ void introState(unsigned long timer) {
 }
 
 void startState(unsigned long timer) {
+  playSong(fanfare, fanfareDurations);
   setupMap();
   setupPlayer();
   updateCaveDisplay();
@@ -486,12 +487,12 @@ void playState(unsigned long timer) {
     currentRoom = cave[nextPlayerX][nextPlayerY];
     nextAnimationFrameTime = 0;
     animationFrameOffset = 0;
-    stopSong();
     if (currentRoom.wall) {
       // wall beep
       playSong(bonk, bonkDurations);
       return;
     } else {
+      stopSong();
       playerX = nextPlayerX;
       playerY = nextPlayerY;
       setDefaultBrightness();
@@ -642,14 +643,16 @@ void arrowFireState(unsigned long timer) {
 
   updateCaveDisplay(); // reset cave view
   if (currentRoom.wumpus) {
+    playSong(youWin, youWinDurations);
     currentStateFn = &youWinState;
   } else if (currentRoom.wumpusNearby) {
+    playSong(wumpusMove, wumpusMoveDurations);
     currentStateFn = &wumpusMoveState;
   } else {
+    // hit a wall
+    playSong(ricochet, ricochetDurations);
     currentStateFn = &playState;
   }
-  // hit a wall
-  playSong(bonk, bonkDurations);
 }
 
 void youLoseState(unsigned long timer) {
@@ -659,4 +662,7 @@ void youLoseState(unsigned long timer) {
 }
 
 void youWinState(unsigned long timer) {
+  if (buttonState(arrow)) {
+    currentStateFn = &startState;
+  }
 }
