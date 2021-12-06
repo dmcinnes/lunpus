@@ -44,6 +44,9 @@ uint8_t *currentSongDurations;
 
 unsigned long nextAnimationFrameTime = 0;
 uint8_t animationFrameOffset = 0;
+uint8_t textOffset = 0;
+
+const uint8_t totalMaskSegments = 7;
 
 SevSegShift sevsegshift(
                   SHIFT_PIN_DS,
@@ -116,8 +119,6 @@ void displayBatsNearby(unsigned long timer) {
     batFrameOffset = 0;
   }
 }
-
-const uint8_t totalMaskSegments = 7;
 
 void displayPitNearby(unsigned long timer) {
   const uint16_t *maskSegments;
@@ -368,18 +369,17 @@ void stopSong() {
 
 void renderText(unsigned long timer, uint8_t text[], uint8_t length) {
   static unsigned long nextAction = 0;
-  static uint8_t offset = 0;
   if (nextAction > timer) {
     return;
   }
   nextAction = timer + 400;
   uint8_t segments[2];
-  segments[0] = eeprom_read_byte(&text[offset]);
-  segments[1] = eeprom_read_byte(&text[offset + 1]);
+  segments[0] = eeprom_read_byte(&text[textOffset]);
+  segments[1] = eeprom_read_byte(&text[textOffset + 1]);
   sevsegshift.setSegments(segments);
-  offset++;
-  if (offset == length) {
-    offset = 0;
+  textOffset++;
+  if (textOffset == length) {
+    textOffset = 0;
   }
 }
 
@@ -431,6 +431,7 @@ void introState(unsigned long timer) {
 }
 
 void startState(unsigned long timer) {
+  textOffset = 0;
   playSong(fanfare, fanfareDurations);
   setupMap();
   setupPlayer();
@@ -471,6 +472,8 @@ void playState(unsigned long timer) {
   }
 
   if (buttonState(arrow)) {
+    stopSong();
+    setDefaultBrightness();
     currentStateFn = &arrowStartState;
     return;
   }
