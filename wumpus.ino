@@ -15,7 +15,7 @@ const uint8_t southWall[2] = {0x88, 0x08};
 const uint8_t eastWall[2]  = {0x00, 0x06};
 const uint8_t westWall[2]  = {0x30, 0x00};
 
-uint16_t buttonStates[5] = {};
+uint8_t buttonStates[5] = {};
 
 const uint8_t mapWidth = 12;
 const uint8_t mapHeight = 12;
@@ -27,7 +27,7 @@ const uint8_t maxPits = 6;
 const uint8_t minBats = 2;
 const uint8_t maxBats = 6;
 
-const uint8_t maxArrows = 6;
+const uint8_t maxArrows = 4;
 
 const uint8_t maxBrightness = 90;
 
@@ -39,8 +39,8 @@ uint8_t arrows;
 
 unsigned long nextNoteTime = 0;
 uint8_t currentNote = 0;
-const uint16_t *currentSong = &hotmk[0];
-const uint8_t *currentSongDurations = &hotmkDurations[0];
+uint16_t *currentSong;
+uint8_t *currentSongDurations;
 
 unsigned long nextAnimationFrameTime = 0;
 uint8_t animationFrameOffset = 0;
@@ -60,8 +60,8 @@ SevSegShift sevsegshift(
 
 bool buttonState(button id) {
   // debounce state
-  buttonStates[id] = (buttonStates[id] << 1) | digitalRead(buttonPins[id]) | 0xe000;
-  return (buttonStates[id] == 0xf000);
+  buttonStates[id] = (buttonStates[id] << 1) | digitalRead(buttonPins[id]);
+  return (buttonStates[id] == 0x80);
 }
 
 void updateCaveDisplay() {
@@ -111,7 +111,7 @@ void displayBatsNearby(unsigned long timer) {
   batFrameOffset++;
   if (batFrameOffset == 4) {
     updateCaveDisplay();
-    batDirection = random(2);
+    batDirection = timer % 2;
     nextAction = timer + 500 + random(500);
     batFrameOffset = 0;
   }
@@ -366,23 +366,21 @@ void stopSong() {
   playNote(REST);
 }
 
-bool renderText(unsigned long timer, uint8_t text[]) {
+void renderText(unsigned long timer, uint8_t text[], uint8_t length) {
   static unsigned long nextAction = 0;
-  static uint8_t offset = 1;
+  static uint8_t offset = 0;
   if (nextAction > timer) {
-    return false;
+    return;
   }
   nextAction = timer + 400;
   uint8_t segments[2];
-  segments[0] = eeprom_read_byte(&text[offset + 1]);
-  segments[1] = eeprom_read_byte(&text[offset + 2]);
+  segments[0] = eeprom_read_byte(&text[offset]);
+  segments[1] = eeprom_read_byte(&text[offset + 1]);
   sevsegshift.setSegments(segments);
   offset++;
-  if (offset == eeprom_read_byte(&text[0])) {
-    offset = 1;
-    return true;
+  if (offset == length) {
+    offset = 0;
   }
-  return false;
 }
 
 void setup() {
@@ -425,12 +423,9 @@ void loop() {
 /* #### Game States #### */
 
 void introState(unsigned long timer) {
-  if (renderText(timer, introText)) {
-    currentStateFn = &startState;
-  }
+  renderText(timer, introText, 18);
 
   if (buttonState(arrow)) {
-    stopSong();
     currentStateFn = &startState;
   }
 }
@@ -553,7 +548,7 @@ void pitfallState(unsigned long timer) {
 }
 
 void disturbWumpusState(unsigned long timer) {
-  if (random(4) == 0) {
+  if ((timer % 4) == 0) {
     currentStateFn = &wumpusEatState;
   } else {
     playSong(wumpusMove, wumpusMoveDurations);
@@ -632,15 +627,7 @@ void arrowStartState(unsigned long timer) {
     }
   }
 
-  if (nextAnimationFrameTime > timer) {
-    return;
-  }
-  animationFrameOffset = (animationFrameOffset + 1) % 6;
-  uint8_t displaySegments[2];
-  displaySegments[0] = eeprom_read_byte(&arrowSelectDigits[arrows]);
-  displaySegments[1] = eeprom_read_byte(&arrowSelectFrames[animationFrameOffset]);
-  sevsegshift.setSegments(displaySegments);
-  nextAnimationFrameTime = timer + 200;
+  displayAnimation(timer, 200, arrowSelectFrames[arrows - 1]);
 }
 
 void arrowFireState(unsigned long timer) {
@@ -671,6 +658,7 @@ void arrowFireState(unsigned long timer) {
     playSong(youWin, youWinDurations);
     currentStateFn = &youWinState;
   } else if (currentRoom.wumpusNearby) {
+    // hit a wall near the wumpus
     playSong(wumpusMove, wumpusMoveDurations);
     currentStateFn = &wumpusMoveState;
   } else {
@@ -687,6 +675,7 @@ void youLoseState(unsigned long timer) {
 }
 
 void youWinState(unsigned long timer) {
+  renderText(timer, youWinText, 18);
   if (buttonState(arrow)) {
     currentStateFn = &startState;
   }
