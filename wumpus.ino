@@ -86,7 +86,7 @@ void updateCaveDisplay() {
     display[1] |= westWall[1];
   }
 
-  sevsegshift.setSegments(display);
+  setSegments(display);
 }
 
 void displayBatsNearby(unsigned long timer) {
@@ -99,7 +99,7 @@ void displayBatsNearby(unsigned long timer) {
 
   updateCaveDisplay();
   uint8_t segments[2];
-  sevsegshift.getSegments(segments);
+  getSegments(segments);
   // wipe out wall dots
   segments[0] &= 0x7F;
   segments[1] &= 0x7F;
@@ -109,7 +109,7 @@ void displayBatsNearby(unsigned long timer) {
   } else {
     segments[!batDirection] |= frame;
   }
-  sevsegshift.setSegments(segments);
+  setSegments(segments);
   nextAction = timer + 50 + random(100);
   batFrameOffset++;
   if (batFrameOffset == 4) {
@@ -121,43 +121,45 @@ void displayBatsNearby(unsigned long timer) {
 }
 
 void displayPitNearby(unsigned long timer) {
-  const uint16_t *maskSegments;
-  uint8_t goingUp;
-  if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) <
-      (cave[playerX + 1][playerY].wall + cave[playerX - 1][playerY].wall)) {
-    maskSegments = &windNorthSouthMask[0];
-    goingUp = playerX % 2;
-  } else {
-    maskSegments = &windEastWestMask[0];
-    goingUp = playerY % 2;
-  }
-
-  static unsigned long nextAction = 0;
+  /* const uint16_t *maskSegments; */
+  /* uint8_t goingUp; */
+  /* if ((cave[playerX][playerY - 1].wall + cave[playerX][playerY + 1].wall) < */
+  /*     (cave[playerX + 1][playerY].wall + cave[playerX - 1][playerY].wall)) { */
+  /*   maskSegments = &windNorthSouthMask[0]; */
+  /*   goingUp = playerX % 2; */
+  /* } else { */
+  /*   maskSegments = &windEastWestMask[0]; */
+  /*   goingUp = playerY % 2; */
+  /* } */
+  /*  */
+  /* static unsigned long nextAction = 0; */
   static uint8_t windOffset = 0;
 
   playWind(windOffset);
-  if (nextAction > timer) {
-    return;
-  }
-  updateCaveDisplay();
-  if (windOffset == 0xFF) { // wrapped around
-    windOffset = totalMaskSegments - 1;
-    nextAction = timer + 400 + random(600);
-    return;
-  }
-  if (goingUp && windOffset == totalMaskSegments) {
-    windOffset = 0;
-    nextAction = timer + 400 + random(600);
-    return;
-  }
-  uint8_t displaySegments[2];
-  sevsegshift.getSegments(displaySegments);
-  uint16_t word = eeprom_read_word(maskSegments + windOffset);
-  displaySegments[0] &= (uint8_t)word;
-  displaySegments[1] &= (uint8_t)(word >> 8);
-  sevsegshift.setSegments(displaySegments);
-  nextAction = timer + 75;
-  windOffset += (goingUp) ? +1 : -1;
+  windOffset++;
+
+  /* if (nextAction > timer) { */
+  /*   return; */
+  /* } */
+  /* updateCaveDisplay(); */
+  /* if (windOffset == 0xFF) { // wrapped around */
+  /*   windOffset = totalMaskSegments - 1; */
+  /*   nextAction = timer + 400 + random(600); */
+  /*   return; */
+  /* } */
+  /* if (goingUp && windOffset == totalMaskSegments) { */
+  /*   windOffset = 0; */
+  /*   nextAction = timer + 400 + random(600); */
+  /*   return; */
+  /* } */
+  /* uint8_t displaySegments[2]; */
+  /* getSegments(displaySegments); */
+  /* uint16_t word = eeprom_read_word(maskSegments + windOffset); */
+  /* displaySegments[0] &= (uint8_t)word; */
+  /* displaySegments[1] &= (uint8_t)(word >> 8); */
+  /* setSegments(displaySegments); */
+  /* nextAction = timer + 75; */
+  /* windOffset += (goingUp) ? +1 : -1; */
 }
 
 void playWind(uint8_t windOffset) {
@@ -209,7 +211,7 @@ bool displayAnimation(unsigned long timer, uint16_t frameTime, const uint8_t fra
   uint8_t frameCount = eeprom_read_byte(&frames[0]);
   displaySegments[0] = eeprom_read_byte(&frames[animationFrameOffset + 1]);
   displaySegments[1] = eeprom_read_byte(&frames[animationFrameOffset + 2]);
-  sevsegshift.setSegments(displaySegments);
+  setSegments(displaySegments);
   nextAnimationFrameTime = timer + frameTime;
   animationFrameOffset = (animationFrameOffset + 2) % frameCount;
   return true;
@@ -376,7 +378,7 @@ void renderText(unsigned long timer, uint8_t text[], uint8_t length) {
   uint8_t segments[2];
   segments[0] = eeprom_read_byte(&text[textOffset]);
   segments[1] = eeprom_read_byte(&text[textOffset + 1]);
-  sevsegshift.setSegments(segments);
+  setSegments(segments);
   textOffset++;
   if (textOffset == length) {
     textOffset = 0;
@@ -544,7 +546,7 @@ void pitfallState(unsigned long timer) {
     dropSound = 0;
     stopSong();
     uint8_t segments[2] = {0xFF, 0xFF};
-    sevsegshift.setSegments(segments);
+    setSegments(segments);
     playSong(splat, splatDurations);
     currentStateFn = &youLoseState;
   }
@@ -682,4 +684,38 @@ void youWinState(unsigned long timer) {
   if (buttonState(arrow)) {
     currentStateFn = &startState;
   }
+}
+
+uint8_t swapBits(uint8_t x, uint8_t p1, uint8_t p2) {
+    /* Move all bits of first set to rightmost side */
+    uint8_t set1 = (x >> p1) & 0x01;
+    /* Move all bits of second set to rightmost side */
+    uint8_t set2 = (x >> p2) & 0x01;
+    /* XOR the two sets */
+    uint8_t eXor = (set1 ^ set2);
+    /* Put the xor bits back to their original positions */
+    eXor = (eXor << p1) | (eXor << p2);
+    /* XOR the 'eXor' with the original number so that the
+       two sets are swapped */
+    return x ^ eXor;
+}
+
+// flip segments[1]
+// xxFEDCBA -> xxCBAFED
+
+uint8_t invertSegment(uint8_t segment) {
+  segment = swapBits(segment, 0, 3);
+  segment = swapBits(segment, 1, 4);
+  segment = swapBits(segment, 2, 5);
+  return segment;
+}
+
+void getSegments(uint8_t segments[2]) {
+  sevsegshift.getSegments(segments);
+  segments[1] = invertSegment(segments[1]);
+}
+
+void setSegments(uint8_t segments[2]) {
+  segments[1] = invertSegment(segments[1]);
+  sevsegshift.setSegments(segments);
 }
