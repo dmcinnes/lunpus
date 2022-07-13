@@ -32,5 +32,8 @@ You only have 4 arrows, use them wisely! Once you have shot them all you lose. T
 * Press `ARROW` to show you how many arrows you have left. Press a direction to fire one, otherwise press `ARROW` again to cancel.
 * Once you win (or more likely die) press `ARROW` again to start a new game.
 
+## Schematic
+
+![Schematic_wumpus_2022-07-12](https://user-images.githubusercontent.com/16557/178660201-9c5f815e-daab-49e6-a2a7-c4c80a61295c.svg)
 
 ![intro screen](https://user-images.githubusercontent.com/16557/178656952-58d82706-e010-420b-a561-4aeffd06e17f.gif)
