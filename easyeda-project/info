@@ -1,0 +1,223 @@
+{
+  "uuid": "0d8e69fc6d373548f5041599f535aacd",
+  "path": "Offline/wumpus",
+  "name": "wumpus",
+  "content": "",
+  "created_at": "2021-11-14 15:33:11",
+  "updated_at": "2022-07-12 22:47:37",
+  "stick": "",
+  "documents": [
+    {
+      "uuid": "4a6a6c58f00d2130a6a14754c2cde539",
+      "title": "Sheet_1",
+      "description": "",
+      "docType": "1",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "ff6d760748e040609dd3fb9323f8683a": 1,
+        "65cbe7a1608343d2bf462a7680fb7efb": 1,
+        "d6aecaa2cce84a9fa0870edc03b22080": 1,
+        "e8227dd34355fb317f612b5079bf676c": 5,
+        "3fd325da98d64094ae1a8fba190f7116": 1,
+        "eaadfa081668433f8a0f6c0ed26f5ae9": 2,
+        "c5650d1b6d9548b29021150f4d6f9829": 2,
+        "40bc13e1cbf1485982bf2d1f6e1b82a6": 2,
+        "cc97d8c7b3b742e9822b80b1b17483b4": 1,
+        "c996990367134df4854174670f257897": 1
+      },
+      "BOM": [
+        [
+          "Value",
+          "Quantity",
+          "Package",
+          "Components",
+          "CustomPara"
+        ],
+        [
+          "button6*6*8.5",
+          5,
+          "KEY-TH_4P-L6.0-W6.0-P4.50",
+          "ARROW,EAST,NORTH,SOUTH,WEST",
+          {
+            "BOM_Supplier Part": "C59980",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "ReliaPro",
+            "BOM_Manufacturer Part": "button6*6*8.5",
+            "puuid": "9096c4e6bc254754b0b895e85df2faca",
+            "uuid": "e8227dd34355fb317f612b5079bf676c"
+          }
+        ],
+        [
+          "1nF",
+          2,
+          "CAP-TH_L5.0-W2.5-P2.54-D0.7",
+          "C1,C2",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C353905",
+            "BOM_Manufacturer": "Dersonic",
+            "BOM_Manufacturer Part": "CC1H102MA1PDB44B3003",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "a894e235a7cc484b98d785ff0fe199b0",
+            "uuid": "40bc13e1cbf1485982bf2d1f6e1b82a6"
+          }
+        ],
+        [
+          "Battery",
+          1,
+          "HDR-TH_2P-P2.54-V-M-1",
+          "H1",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "TE Connectivity",
+            "BOM_Manufacturer Part": "826629-2",
+            "BOM_Supplier Part": "C86471",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "7ae61b24ec5d431087f34ea7cfebbd9e",
+            "uuid": "c996990367134df4854174670f257897"
+          }
+        ],
+        [
+          "LED 5161AS",
+          2,
+          "LEDSEG_0.39_1",
+          "LED1,LED2",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "ReliaPro",
+            "BOM_Manufacturer Part": "FJ3191AH",
+            "BOM_Supplier Part": "C44296",
+            "puuid": "2e96bc521f1843a1a15d6472c81f6cca",
+            "uuid": "c5650d1b6d9548b29021150f4d6f9829"
+          }
+        ],
+        [
+          "470Ω",
+          1,
+          "AXIAL-0.3",
+          "R1",
+          {
+            "BOM_Supplier Part": "C61674",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "UniOhm",
+            "BOM_Manufacturer Part": "MFR0W8F4700A50",
+            "puuid": "0437d6ea43a344008eabc8b31fcec72b",
+            "uuid": "3fd325da98d64094ae1a8fba190f7116"
+          }
+        ],
+        [
+          "330Ω",
+          2,
+          "AXIAL-0.4",
+          "R2,R3",
+          {
+            "BOM_Supplier Part": "C58608",
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "UniOhm",
+            "BOM_Manufacturer Part": "MFR0W4F3300A50",
+            "puuid": "fa1662f60f414c68840027391272bb3f",
+            "uuid": "eaadfa081668433f8a0f6c0ed26f5ae9"
+          }
+        ],
+        [
+          "EG1218",
+          1,
+          "SW-TH_EG1218",
+          "SW1",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Supplier Part": "C273394",
+            "BOM_Manufacturer": "E-Switch",
+            "BOM_Manufacturer Part": "EG1218",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "c34b08bc5ef04c3db2fd4aec73e6d7b3",
+            "uuid": "cc97d8c7b3b742e9822b80b1b17483b4"
+          }
+        ],
+        [
+          "ATTINY84A-PU",
+          1,
+          "DIP-14_L19.2-W6.6-P2.54-LS10.9-BL",
+          "U1",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "MICROCHIP",
+            "BOM_Manufacturer Part": "ATTINY84A-PU",
+            "BOM_Supplier Part": "C145560",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "b33782c06f59456891d65206827fb3a9",
+            "uuid": "ff6d760748e040609dd3fb9323f8683a"
+          }
+        ],
+        [
+          "SN74HC595N",
+          1,
+          "DIP-16_L19.8-W6.5-P2.54-LS7.6-BL",
+          "U2",
+          {
+            "BOM_Supplier": "LCSC",
+            "BOM_Manufacturer": "TI",
+            "BOM_Manufacturer Part": "SN74HC595N",
+            "BOM_Supplier Part": "C78711",
+            "BOM_JLCPCB Part Class": "Extended Part",
+            "puuid": "1f423f14388b4b17afc87646625a53f6",
+            "uuid": "65cbe7a1608343d2bf462a7680fb7efb"
+          }
+        ],
+        [
+          "CEM-1203(42)",
+          1,
+          "CEM-1203(42)",
+          "U3",
+          {
+            "BOM_Supplier": "Digi-Key",
+            "BOM_Supplier Part": "102-1153-ND",
+            "BOM_Manufacturer": "CUI Devices",
+            "BOM_Manufacturer Part": "CEM-1203(42)",
+            "puuid": "1e6541b70f6f43dba8b455a509a07661",
+            "uuid": "d6aecaa2cce84a9fa0870edc03b22080"
+          }
+        ]
+      ],
+      "updateTime": 1657691257,
+      "createTime": 1636932800,
+      "histories": [],
+      "created_at": "2021-11-14 15:33:20",
+      "updated_at": "2022-07-12 22:47:37"
+    },
+    {
+      "uuid": "828ddde79e364ee6ac2b6851417d7be6",
+      "puuid": "0d8e69fc6d373548f5041599f535aacd",
+      "title": "PCB_wumpus",
+      "filename": "PCB_wumpus.json",
+      "description": "",
+      "docType": "3",
+      "master": "",
+      "thumb": "/images/thumb-default.png",
+      "components": {
+        "9096c4e6bc254754b0b895e85df2faca": 5,
+        "a894e235a7cc484b98d785ff0fe199b0": 2,
+        "7ae61b24ec5d431087f34ea7cfebbd9e": 1,
+        "2e96bc521f1843a1a15d6472c81f6cca": 2,
+        "0437d6ea43a344008eabc8b31fcec72b": 1,
+        "fa1662f60f414c68840027391272bb3f": 2,
+        "c34b08bc5ef04c3db2fd4aec73e6d7b3": 1,
+        "b33782c06f59456891d65206827fb3a9": 1,
+        "1f423f14388b4b17afc87646625a53f6": 1,
+        "1e6541b70f6f43dba8b455a509a07661": 1
+      },
+      "BOM": [],
+      "updateTime": 1650325493,
+      "createTime": 1636955377,
+      "histories": [],
+      "created_at": "2021-11-14 21:49:37",
+      "updated_at": "2022-04-18 16:44:53"
+    }
+  ],
+  "sort": [],
+  "title": "wumpus",
+  "foldername": "wumpus",
+  "schfilename": "wumpus.json",
+  "schfilemtime": 1657691257890
+}
