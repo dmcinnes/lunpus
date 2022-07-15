@@ -32,6 +32,10 @@ You only have 4 arrows, use them wisely! Once you have shot them all you lose. T
 * Press `ARROW` to show you how many arrows you have left. Press a direction to fire one, otherwise press `ARROW` again to cancel.
 * Once you win (or more likely die) press `ARROW` again to start a new game.
 
+## PCB
+
+The [pcb directory](https://github.com/dmcinnes/lunpus/tree/main/pcb) contains [EasyEDA](https://easyeda.com/) project files that define the schematic and PCB construction. Also in this directory is the latest generation of Gerber files for fabracation.
+
 ## Schematic
 
 ![Schematic_wumpus_2022-07-12](https://user-images.githubusercontent.com/16557/178660201-9c5f815e-daab-49e6-a2a7-c4c80a61295c.svg)
