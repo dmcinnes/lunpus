@@ -43,3 +43,7 @@ The [pcb directory](https://github.com/dmcinnes/lunpus/tree/main/pcb) contains [
 ![Schematic_wumpus_2022-07-12](https://user-images.githubusercontent.com/16557/178660201-9c5f815e-daab-49e6-a2a7-c4c80a61295c.svg)
 
 [![intro screen](https://user-images.githubusercontent.com/16557/178656952-58d82706-e010-420b-a561-4aeffd06e17f.gif)](https://youtu.be/uNveLRCgQw0)
+
+## License
+
+<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Lunpus</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://dougmcinnes.com" property="cc:attributionName" rel="cc:attributionURL">Doug McInnes</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
