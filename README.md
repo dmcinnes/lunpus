@@ -8,6 +8,8 @@ Based on the old [Hunt the Wumpus](https://en.wikipedia.org/wiki/Hunt_the_Wumpus
 
 This handheld version has been renamed Hunt the _Lunpus_ for obvious reasons once you consider the constraints of the display 😉
 
+**[Video of the game in action!](https://youtu.be/uNveLRCgQw0)**
+
 ## Rules
 
 You find yourself in a dark cave with the elusive Lunpus! You have your trusty bow and four arrows, let's see if you can defeat the Lunpus before it eats you!
@@ -40,4 +42,4 @@ The [pcb directory](https://github.com/dmcinnes/lunpus/tree/main/pcb) contains [
 
 ![Schematic_wumpus_2022-07-12](https://user-images.githubusercontent.com/16557/178660201-9c5f815e-daab-49e6-a2a7-c4c80a61295c.svg)
 
-![intro screen](https://user-images.githubusercontent.com/16557/178656952-58d82706-e010-420b-a561-4aeffd06e17f.gif)
+[![intro screen](https://user-images.githubusercontent.com/16557/178656952-58d82706-e010-420b-a561-4aeffd06e17f.gif)](https://youtu.be/uNveLRCgQw0)
