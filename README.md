@@ -40,10 +40,10 @@ You only have 4 arrows, use them wisely! Once you have shot them all you lose. T
 
 * The latest [Arduino IDE](https://www.arduino.cc/en/software).
 * [SevSegShift library](https://github.com/bridystone/SevSegShift) (install this under `Tools > Manage Libraries...` inside of the Arduino IDE).
-* [ATTinyCore](https://github.com/SpenceKonde/ATTinyCore) to add Arduino support for ATtiny chips. (Install this under `Tools > Board: "xxx" > Boards Manager...` of the Arduino IDE).
+* [ATTinyCore](https://github.com/SpenceKonde/ATTinyCore) to add Arduino support for ATtiny chips (Install this under `Tools > Board: "xxx" > Boards Manager...` of the Arduino IDE).
 * [Arduino-Makefile](https://github.com/sudar/Arduino-Makefile) to use the [included Makefile](Makefile) for CLI development.
 
-Once these are installed, wire up your ATtiny with a programmer. I use the [AVR Pocket Programmer](https://www.sparkfun.com/products/9825). If you use something different you will need to change setting in the [Makefile](Makefile).
+Once these are installed, wire up your ATtiny with a programmer. I use the [AVR Pocket Programmer](https://www.sparkfun.com/products/9825). If you use something different you will need to change settings in the [Makefile](Makefile).
 
 First set the fuses to get the proper 8 MHz internal clock:
 ```cli
