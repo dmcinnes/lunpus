@@ -1,24 +1,23 @@
 
 ALTERNATE_CORE = ATTinyCore
-ALTERNATE_CORE_PATH = /Users/doug/Library/Arduino15/packages/ATTinyCore/hardware/avr/1.5.2
+ALTERNATE_CORE_PATH = $(HOME)/Library/Arduino15/packages/ATTinyCore/hardware/avr/1.5.2
 
 ISP_PROG = usbtiny
-# AVRDUDE_ARD_PROGRAMMER = usbtiny
-# AVRDUDE_ARD_BAUDRATE = 19200
 BOARD_TAG = attinyx4
 BOARD_SUB = 84
 VARIANT = tinyX4_reverse # get the 'proper' pin ordering
+BOARD_CLOCK = 8internal
 F_CPU = 8000000L
 
+# ATTinyCore's interpolation is not working so we have to set this directly.
+# This is the default.
 ISP_HIGH_FUSE = 0xDF
-ISP_LOW_FUSE = 0xE2
+
+# Write to the EEPROM on ispload
+# All the music, text and "graphics" are in EEPROM.
+ISP_EEPROM  = 1
 
 ARDUINO_LIBS = SevSegShift
 
-ISP_EEPROM  = 1
 
 include /usr/local/opt/arduino-mk/Arduino.mk
-
-# eeprom: 
-# 	avrdude -c usbtiny -p attiny84 -U eeprom:w:/var/folders/8w/cgb3rkx15g1bmpf112vwkjp40000gn/T/arduino_build_464809/wumpus.ino.eep:i
-#
