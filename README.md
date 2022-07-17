@@ -34,6 +34,29 @@ You only have 4 arrows, use them wisely! Once you have shot them all you lose. T
 * Press `ARROW` to show you how many arrows you have left. Press a direction to fire one, otherwise press `ARROW` again to cancel.
 * Once you win (or more likely die) press `ARROW` again to start a new game.
 
+## Flashing the ATtiny84
+
+### Requirements
+
+* The latest [Arduino IDE](https://www.arduino.cc/en/software).
+* [SevSegShift library](https://github.com/bridystone/SevSegShift) (install this under `Tools > Manage Libraries...` inside of the Arduino IDE).
+* [ATTinyCore](https://github.com/SpenceKonde/ATTinyCore) to add Arduino support for ATtiny chips. (Install this under `Tools > Board: "xxx" > Boards Manager...` of the Arduino IDE).
+* [Arduino-Makefile](https://github.com/sudar/Arduino-Makefile) to use the [included Makefile](Makefile) for CLI development.
+
+Once these are installed, wire up your ATtiny with a programmer. I use the [AVR Pocket Programmer](https://www.sparkfun.com/products/9825). If you use something different you will need to change setting in the [Makefile](Makefile).
+
+First set the fuses to get the proper 8 MHz internal clock:
+```cli
+make set_fuses
+```
+
+Once that is successful you can flash the chip:
+```cli
+make ispload
+```
+
+The `ispload` command flashes the program and will also flash the EEPROM which is where all the music, text and "graphics" reside. The 8K flash memory is almost entirely taken up by the program (8146 bytes 99.4% Full) and the EEPROM is alsmot full as well (465 bytes 90.8% Full).
+
 ## PCB
 
 The [pcb directory](https://github.com/dmcinnes/lunpus/tree/main/pcb) contains [EasyEDA](https://easyeda.com/) project files that define the schematic and PCB construction. Also in this directory is the latest generation of Gerber files for fabracation.
