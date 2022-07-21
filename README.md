@@ -1,6 +1,6 @@
 # Hunt the Lunpus
 
-A hand-held 7-segement display game based on the ATtiny84.
+A hand-held 7-segment display game based on the ATtiny84.
 
 ![lunpus](https://user-images.githubusercontent.com/16557/178653913-8a91fd65-4db3-4b30-b797-d2b1e6d01d4c.jpg)
 
