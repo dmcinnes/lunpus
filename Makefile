@@ -12,6 +12,8 @@ F_CPU = 8000000L
 # ATTinyCore's interpolation is not working so we have to set this directly.
 # This is the default.
 ISP_HIGH_FUSE = 0xDF
+# 8 MHz, do not divide by 8
+ISP_LOW_FUSE = 0xE2
 
 # Write to the EEPROM on ispload
 # All the music, text and "graphics" are in EEPROM.
