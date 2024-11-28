@@ -66,7 +66,56 @@ The [pcb directory](https://github.com/dmcinnes/lunpus/tree/main/pcb) contains [
 ![Schematic_wumpus_2022-07-12](https://user-images.githubusercontent.com/16557/178660201-9c5f815e-daab-49e6-a2a7-c4c80a61295c.svg)
 
 [![intro screen](https://user-images.githubusercontent.com/16557/178656952-58d82706-e010-420b-a561-4aeffd06e17f.gif)](https://youtu.be/uNveLRCgQw0)
+## Components
 
-## License
+U1: 14-pin chip socket
+U1: ATTiny84 microprocessor
+U2: SN74HC595N microchip
+U3: Piezoelectric Speaker
+R1: 470Ω resistor
+R2, R3: 330Ω resistor
+C1, C2: 1nF ceramic capacitor
+SW1: DPDT Switch
+H1: 3xAAA Battery Holder
+LED1, LED2: 5611AS single digit 7-segment display
+NORTH, SOUTH, EAST, WEST, ARROW: tac switches (buttons)
+
+## Construction
+
+All of the components should rest on the top of the circuit board with the
+silkscreen, the side with the word "Lunpus". All soldering happens on the
+reverse side, without the words.
+
+1. First solder on the resistors, R1, R2 and R3. Clip the excess leads.
+    R1 is 470Ω, yellow, purple, brown, gold.
+    R2 and R3 are 330Ω, orange, orange, brown, gold.
+2. Next solder on the capacitors C1 and C2, both are 1nF. Clip the excess leads.
+3. Solder on the five buttons.
+    They will fit in the holes in one orientation.
+4. Solder the 14-pin chip socket in the U1 position. This is for the
+    microcontroller. Ensure the notch on one end of the socket matches the notch
+    on the circuit board.
+5. Solder on the SN74HC595N chip in the U2 position.
+    Ensure the notch on one end of the chip matches the notch on the circuit
+    board.
+6. Solder the speaker in the round position marked "Speaker". Clip the excess
+    leads. Ensure the positive pin (+) matches what's on the circuit board.
+7. Solder the two 7-segment displays to the areas marked LED1 and LED2.
+    IMPORTANT NOTE! The display on the right, LED2, needs to be soldered in
+    upside down, with the decimal point on the top. Make sure the display
+    matches what's printed on the circuit board.
+8. Solder the three-pin switch to SW1.
+9. Strip the leads from the battery holder to about 1.5 cm. Strip ends of the
+    insulation of the last 1/2 cm to bare wire.
+10. Solder the battery holder leads to the + and - of H1. The red lead goes to +.
+11. Attach the battery holder to the back of the circuit board using
+    double-sided foam tape.
+12. Insert the ATtiny84 into the chip socket after it has been flashed.
+    Ensure the notch on the chip matches the notch of the socket. Be careful
+    when inserting as pins can easily fold up underneath the chip.
+
+Add 3 AAA batteries, turn on the switch and enjoy!
+
+# License
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Lunpus</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://dougmcinnes.com" property="cc:attributionName" rel="cc:attributionURL">Doug McInnes</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
