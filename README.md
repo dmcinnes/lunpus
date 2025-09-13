@@ -68,17 +68,18 @@ The [pcb directory](https://github.com/dmcinnes/lunpus/tree/main/pcb) contains [
 [![intro screen](https://user-images.githubusercontent.com/16557/178656952-58d82706-e010-420b-a561-4aeffd06e17f.gif)](https://youtu.be/uNveLRCgQw0)
 ## Components
 
-U1: 14-pin chip socket
-U1: ATTiny84 microprocessor
-U2: SN74HC595N microchip
-U3: Piezoelectric Speaker
-R1: 470Ω resistor
-R2, R3: 330Ω resistor
-C1, C2: 1nF ceramic capacitor
-SW1: DPDT Switch
-H1: 3xAAA Battery Holder
-LED1, LED2: 5611AS single digit 7-segment display
-NORTH, SOUTH, EAST, WEST, ARROW: tac switches (buttons)
+| | |
+|--|--|
+|U1|ATTiny84 microprocessor in a 14-pin chip socket|
+|U2|SN74HC595N microchip|
+|U3|Piezoelectric Speaker|
+|R1|470Ω resistor|
+|R2, R3|330Ω resistor|
+|C1, C2|1nF ceramic capacitor|
+|SW1|DPDT Switch|
+|H1|3xAAA Battery Holder|
+|LED1, LED2|5611AS single digit 7-segment display|
+|NORTH, SOUTH, EAST, WEST, ARROW|tac switches (buttons)|
 
 ## Construction
 
