@@ -20,8 +20,8 @@ There are dangers in the cave:
 * *Slime Pits* are certain death if you accidently stumble upon one!
 * *The Lunpus* may eat you if you bother its sleep.
 
-You can only see walls that are next to you, however the dangers 
-* Blinking decimal points will warn you there is a *Buperbat* nearby.
+You can see walls that are next to you, and nearby dangers:
+* Blinking decimal points (bats flying overhead) will warn you there is a *Superbat* nearby.
 * The sound of wind will warn you there is a *Slime Pit* nearby.
 * The sound of snoring will warn you *The Lunpus* is nearby.
 
