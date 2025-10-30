@@ -76,7 +76,7 @@ The [pcb directory](https://github.com/dmcinnes/lunpus/tree/main/pcb) contains [
 |R1|470Ω resistor|
 |R2, R3|330Ω resistor|
 |C1, C2|1nF ceramic capacitor|
-|SW1|DPDT Switch|
+|SW1|SPST Switch|
 |H1|3xAAA Battery Holder|
 |LED1, LED2|5611AS single digit 7-segment display|
 |NORTH, SOUTH, EAST, WEST, ARROW|tac switches (buttons)|
